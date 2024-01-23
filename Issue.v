@@ -2,7 +2,8 @@
 
 module Issue(
         input rstn,
-
+//jump flag
+      input wire  ;
 // data
         input wire [72:0] o_instToIssue0_73,
         input wire [72:0] o_instToIssue1_73,
@@ -70,6 +71,8 @@ reg  [3:0] r_BranchStop_4;
 reg  [3:0] r_BranchFirst_4;
 
 
+//为防止数据冲刷：未分配完就有新数据，可能要加延迟
+
 cFifo2 cFifo0(
         i_drive(o_DriveToIssue_1),
         i_freeNext(),
@@ -85,6 +88,9 @@ assign  w_fire01_1=w_fire0_2[1];
 
 //跳转清零
 //前级数据输入
+
+
+
 
 always@(posedge w_fire00_1 or negedge rstn ) begin
 if(!rstn) begin
@@ -110,17 +116,19 @@ wire  [3:0]  w_CsrAddress_4 = r_CsrBinnary_5[3:0];
 assign w_CsrBinnaryNext_5  = r_CsrBinnary_5 + 5'b00001;
 assign w_CsrGrayNext_5 = (w_CsrBinnaryNext_5>>1) ^ w_CsrBinnaryNext_5; 
 
-wire  [4:0]  w_LsuGrayNext_5;
-wire  [4:0]  w_LsuBinnaryNext_5;
+reg  [4:0]  r_LsuGrayNext_5;
+reg  [4:0]  r_LsuBinnaryNext_5;
 reg   [4:0]  r_LsuGray_5;
 reg   [4:0]  r_LsuBinnary_5;
-wire  [3:0]  w_LsuAddress_4 = r_LsuBinnary_5[3:0];
+
 
 assign w_LsuBinnaryNext_5  = r_LsuBinnary_5 + 5'b00001;
 assign w_LsuGrayNext_5 = (w_LsuBinnaryNext_5>>1) ^ w_LsuBinnaryNext_5; 
 
-
-
+integer i;
+integer j;
+integer LsuAddress;
+integer CsrAddress;
 
 
 always@(posedge  w_fire01_1 or negedge rstn ) begin
@@ -130,65 +138,64 @@ r_LsuBinnary_5 <= 5'b0;
 r_CsrGray_5 <= 5'b0;
 r_CsrBinnary_5 <= 5'b0;
 
+LsuAddress=0;
+CsrAddress=0;
+
+for (j= 0; j< DEPTH; j = j + 1) begin
+      CSRIssue[i] = 32'b0; // 初始化CSRIssue数组的值为0
+      LSAIssue[i] = 32'b0; // 初始化LSAIssue数组的值为0
+      ALUIssue[i] = 32'b0; // 初始化ALUIssue数组的值为0
+    end
+
 r_IsFirst_1 <= 1'b1;
 r_IsFirst_1 <= 1'b1;
 r_CsrEmpty_1 <= 1'b1;
 end
 else begin
 if ( r_IsFirst_1 == 1'b1 ) begin
-  for (integer i=0 ;i<16;i++)  begin
+      LsuAddress=0;
+      CsrAddress=0;
+  for (integer i=0 ;i<16;i=i+1)  begin
         if(i <= r_BranchFirst_4) begin
             if(w_AllOpcode_142[6+7*i:7*i]==7'b0101111 ||w_AllOpcode_142[6+7*i:7*i]== 7'b0000011 || w_AllOpcode_142[6+7*i:7*i]== 7'b0101111) begin
-            LSAIssue[r_LsuAddress_4] <= w_AllInstruction_1147[72+73*i,73*i];  
-            r_LsuAddress_4  <= r_LsuAddress_4 + 1'b1;
+            LSAIssue[LsuAddress] <= w_AllInstruction_1147[72+73*i,73*i];  
+            LsuAddress=LsuAddress+1;
+            /*r_LsuAddress_4  <= r_LsuAddress_4 + 1'b1;
             r_LsuBinnary_5 <= w_LsuBinnaryNext_5;
-            r_LsuGray_5 <= w_LsuGrayNext_5;
-            if(r_LsuEmpty_1 == 1'b1) begin
-                r_LsuEmpty_1 <= 0'b0;
+            r_LsuGray_5 <= w_LsuGrayNext_5;*/
+              if(r_LsuEmpty_1 == 1'b1) begin
+                r_LsuEmpty_1 <= 1'b0;
             end
-            else begin
-                r_LsuEmpty_1 <= 0'b0;
             end
-           
-        
-            end
+
         else if(w_AllOpcode_142[6+7*i:7*i]== 7'b1110011 ) begin
-            CSRIssue[r_CsrAddresss_4]  <= w_AllInstruction_1147[72+73*i,73*i];  
-            r_CsrAddresss_4 <= r_CsrAddresss_4 + 1'b1;
-            r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
-            r_CsrGray_5 <= w_CsrGrayNext_5;
+            CSRIssue[CsrAddresss]  <= w_AllInstruction_1147[72+73*i,73*i];  
+            CsrAddresss = CsrAddresss + 1;
+           /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
+            r_CsrGray_5 <= w_CsrGrayNext_5;*/
             if(r_CsrEmpty_1 == 1'b1) begin
-                r_CsrEmpty_1 <= 0'b0;
-            end
-            else begin
-                r_CsrEmpty_1 <= 0'b0;
+                r_CsrEmpty_1 <= 1'b0;
             end
             end
+
         else  begin
             ALUIssue[i] <= w_AllInstruction_1147[72+73*i,73*i];  
             end
-
             r_IsFirst_1 <= 1'b0;
-
         end
+
      else begin
           
-            if(w_AllOpcode_142[6+7*i:7*i]==7'b0101111 ||w_AllOpcode_142[6+7*i:7*i]== 7'b0000011 || w_AllOpcode_142[6+7*i:7*i]== 7'b0101111) begin
-            LSAIssue[r_LsuAddress_4] <= 32'b0;  
-    
-            end
-        else if(w_AllOpcode_142[6+7*i:7*i]== 7'b1110011 ) begin
-            CSRIssue[r_CsrAddresss_4]  <= 32'b0;  
-            end
-        else  begin
+            
             ALUIssue[i] <= 32'b0;  
             end
         end
      end
   end
 end
+
 else begin
-for (integer i=0 ;i<16;i++)  begin
+for (integer i=0 ;i<16;i=i+1)  begin
         if(i >= r_BranchStart_4 || i <=  r_BranchStop_4) begin
             if(w_AllOpcode_142[6+7*i:7*i]== 7'b0101111||w_AllOpcode_142[6+7*i:7*i]== 7'b0000011 ||w_AllOpcode_142[6+7*i:7*i]== 7'b0101111 ) begin
             r_LsuAddress_4 <= r_LsuAddress_4 + 1'b1;
@@ -222,6 +229,65 @@ for (integer i=0 ;i<16;i++)  begin
    end
  end
 end
+
+
+
+
+ LsuIssue IssueLSU (
+       
+    input wire rstn,
+    input wire i_LSUCount_5;
+    output wire o_FreeToIssue0_1,
+    output wire o_FreeToIssue1_1            
+    inout reg io_empty_1;
+    inout reg io_IsFirst_1;
+    input reg [15:0] i_InstructionToLSUIssue_113 [0:112];
+
+    input  wire  i_DriveFromWriteBack_1;
+    output wire  o_FreeToWriteBack_1;
+    input  wire  i_DriveFromIssue_1 ;
+    output wire  o_FreeToIssue_1;
+
+    
+    input wire i_FreeBypassFifoToLSUIssue;
+    output wire o_DriveLSUIssueToBypassFifo;
+
+    input wire i_DriveBypassFifoToLSUIssue;
+    output wire o_FreeLSUIssueToBypassBuffer;
+
+);
+
+
+ CsrIssue IssueCSR(
+       
+    input wire rstn,
+    input wire i_CSRCount_5;
+    output wire o_FreeToIssue0_1,
+    output wire o_FreeToIssue1_1            
+    inout reg io_empty_1;
+    inout reg io_IsFirst_1;
+    input reg [15:0] i_InstructionToCsrIssue_113 [0:112];
+
+    input  wire  i_DriveFromWriteBack_1;
+    output wire  o_FreeToWriteBack_1;
+    input  wire  i_DriveFromIssue_1 ;
+    output wire  o_FreeToIssue_1;
+
+    
+    input wire i_FreeBypassFifoToCsrIssue;
+    output wire o_DriveCsrIssueToBypassFifo;
+
+    input wire i_DriveBypassFifoToCsrIssue;
+    output wire o_FreeCsrIssueToBypassBuffer;
+
+
+);
+
+
+
+
+
+
 
 
 
