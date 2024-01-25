@@ -273,9 +273,9 @@ LsuAddress=0;
 CsrAddress=0;
 
 for (j= 0; j< DEPTH; j = j + 1) begin
-      CSRIssue[i] = 32'b0; // 初始化CSRIssue数组的值为0
-      LSAIssue[i] = 32'b0; // 初始化LSAIssue数组的值为0
-      ALUIssue[i] = 32'b0; // 初始化ALUIssue数组的值为0
+      CSRIssue[i] <= 32'b0; // 初始化CSRIssue数组的值为0
+      LSAIssue[i] <= 32'b0; // 初始化LSAIssue数组的值为0
+      ALUIssue[i] <= 32'b0; // 初始化ALUIssue数组的值为0
     end
 //
 r_IsFirst_1 <= 1'b1;
