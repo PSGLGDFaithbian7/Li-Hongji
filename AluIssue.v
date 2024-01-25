@@ -4,7 +4,7 @@ module ALUIssue(
 input wire  i_DriveFromGRF_1,
 input wire  rstn,
 input wire  i_DriveToAluIssue_1,
-input reg  [112:0] i_InstructionToAluIssue_113,
+input wire  [112:0] i_InstructionToAluIssue_113,
 input wire  i_DriveFromIssueTop_1,
 input wire  i_FreeFromGRF_1,
 input wire  i_FreeFromExe_1,
@@ -129,7 +129,6 @@ output wire o_InstructionToExe_177,
     output wire o_FreeToGRF_1;
     output wire o_FreeToGRF_1;
    
-
 )
  
 wire w_Rs1Valid_1 = i_InstructionToAluIssue_113[68];
