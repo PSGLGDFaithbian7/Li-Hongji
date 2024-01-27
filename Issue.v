@@ -26,19 +26,7 @@ module Issue(
 //signal
         input wire   o_DriveToIssue_1
 //ALUISSUE
-input wire  i_DriveFromGRF_1,
-input wire  rstn,
-input wire  i_DriveToAluIssue_1,
-input wire [112:0] i_InstructionToAluIssue_113,
-input wire  i_DriveFromIssueTop_1,
-input wire  i_FreeFromGRF_1,
-input wire  i_FreeFromExe_1,
-//dkkfldsssldl
 
-output wire o_FreeToIssueTop_1,
-output wire o_DriveToGRF_1,
-output wire o_DriveFromIssueToExe,
-output wire o_InstructionToExe_177,
  //from bypass
      //signal part
     input wire  i_DriveFromBypass0L_1,
@@ -218,8 +206,6 @@ assign  w_fire01_1=w_fire0_2[1];
 //前级数据输入
 
 
-
-
 always@(posedge w_fire00_1 or negedge rstn ) begin
 if(!rstn) begin
     r_BranchStart_4 <= 4'b0;
@@ -376,28 +362,63 @@ end
 end
 
 
+
+
 //有branch,置高first
-always @(*) begin
-    
+always @(negedge i_BranchDrive_1 or negedge rstn) begin
+    if (!rstn) begin
+        r_IsFirst_1 <= 0; // 复位时，r_IsFirst_1置为0
+    end 
+    else if begin
+      if (i_BranchEnable_1) begin
+        r_IsFirst_1 <= 1; // 当BranchEnable为高时，在下降沿将r_IsFirst_1置高
+      end
+      else begin
+        r_IsFirst_1 <= 0;
+      end
+    end
 end
 //
+
+
+
+//启动Issue
+
+
+
+//例化issue
+
+wire [15:0]   i_DriveFromGRF_16;
+wire [15:0]   i_DriveToAluIssue_16;
+wire [1807:0]   i_InstructionToAluIssue_1807;
+wire [15:0]   i_DriveFromIssueTop_16;
+wire [15:0]   i_FreeFromGRF_16;
+wire [15:0]   i_FreeFromExe_16;
+
+wire [15:0]   o_FreeToIssueTop_16;
+wire [15:0]   o_DriveToGRF_16;
+wire [15:0]   o_DriveFromIssueToExe_16;
+wire [1871:0] o_InstructionToExe_1871;
+
+
 
 genvar k;
 generate
     for(k=0;k<16;k=k+1) begin:AluIssue
     AluIssue IssueAlu (
-    .i_DriveFromGRF_1(i_DriveFromGRF_1()),
+    .i_DriveFromGRF_1(i_DriveFromGRF_16[k]),
     .rstn(rstn),
-    .i_DriveToAluIssue_1(i_DriveToAluIssue_1),
-    .i_InstructionToAluIssue_113(i_InstructionToAluIssue_113),
-    .i_DriveFromIssueTop_1(i_DriveFromIssueTop_1),
-    .i_FreeFromGRF_1(i_FreeFromGRF_1()),
-    .i_FreeFromExe_1(i_FreeFromExe_1()),
+    .i_DriveToAluIssue_1(i_DriveToAluIssue_16[k]),
+    .i_InstructionToAluIssue_113(i_InstructionToAluIssue_1807[112+113*k:113*k]),
+    .i_DriveFromIssueTop_1(i_DriveFromIssueTop_16[k]),
+    .i_FreeFromGRF_1(i_FreeFromGRF_16[k]),
+    .i_FreeFromExe_1(i_FreeFromExe_16[k]),
 
-    .o_FreeToIssueTop_1(o_FreeToIssueTop_1()),
-    .o_DriveToGRF_1(o_DriveToGRF_1()),
-    .o_DriveFromIssueToExe(o_DriveFromIssueToExe()),
-    .o_InstructionToExe_177(o_InstructionToExe_177()),
+    .o_FreeToIssueTop_1(o_FreeToIssueTop_16[k]),
+    .o_DriveToGRF_1(o_DriveToGRF_16[k]),
+    .o_DriveFromIssueToExe(o_DriveFromIssueToExe_16[k]),
+    .o_InstructionToExe_177(o_InstructionToExe_1871[177*k+176:117*k]),
+
 
     .i_DriveFromBypass0L_1(i_DriveFromBypass0L_1),
     .i_DriveFromBypass1L_1(i_DriveFromBypass1L_1),
@@ -515,55 +536,43 @@ end
 endgenerate
 
 
- LsuIssue IssueLSU (
-       
-    input wire rstn,
-    input wire i_LSUCount_5;
-    output wire o_FreeToIssue0_1,
-    output wire o_FreeToIssue1_1            
-    inout reg io_empty_1;
-    inout reg io_IsFirst_1;
-    input reg [15:0] i_InstructionToLSUIssue_113 [0:112];
-
-    input  wire  i_DriveFromWriteBack_1;
-    output wire  o_FreeToWriteBack_1;
-    input  wire  i_DriveFromIssue_1 ;
-    output wire  o_FreeToIssue_1;
-
-    
-    input wire i_FreeBypassFifoToLSUIssue;
-    output wire o_DriveLSUIssueToBypassFifo;
-
-    input wire i_DriveBypassFifoToLSUIssue;
-    output wire o_FreeLSUIssueToBypassBuffer;
-
+CsrIssue myCsrInstance (
+    .rstn(rstn_wire),
+    .i_CSRCount_5(count_wire),
+    .o_FreeToIssue0_1(freeToIssue0_wire),
+    .o_FreeToIssue1_1(freeToIssue1_wire),
+    .io_empty_1(empty_wire),
+    .io_IsFirst_1(isFirst_wire),
+    .i_InstructionToCsrIssue_113(instruction_wire),
+    .i_DriveFromWriteBack_1(driveFromWriteBack_wire),
+    .o_FreeToWriteBack_1(freeToWriteBack_wire),
+    .i_DriveFromIssue_1(driveFromIssue_wire),
+    .o_FreeToIssue_1(freeToIssue_wire),
+    .i_FreeBypassFifoToCsrIssue(fifoToCsrIssue_wire),
+    .o_DriveCsrIssueToBypassFifo(driveCsrIssueToBypassFifo_wire),
+    .i_DriveBypassFifoToCsrIssue(driveBypassFifoToCsrIssue_wire),
+    .o_FreeCsrIssueToBypassBuffer(freeCsrIssueToBypassBuffer_wire)
 );
 
 
- CsrIssue IssueCSR(
-       
-    input wire rstn,
-    input wire i_CSRCount_5;
-    output wire o_FreeToIssue0_1,
-    output wire o_FreeToIssue1_1            
-    inout reg io_empty_1;
-    inout reg io_IsFirst_1;
-    input reg [15:0] i_InstructionToCsrIssue_113 [0:112];
-
-    input  wire  i_DriveFromWriteBack_1;
-    output wire  o_FreeToWriteBack_1;
-    input  wire  i_DriveFromIssue_1 ;
-    output wire  o_FreeToIssue_1;
-
-    
-    input wire i_FreeBypassFifoToCsrIssue;
-    output wire o_DriveCsrIssueToBypassFifo;
-
-    input wire i_DriveBypassFifoToCsrIssue;
-    output wire o_FreeCsrIssueToBypassBuffer;
-
-
+LSUIssue myLSUInstance (
+    .rstn(rstn_wire),
+    .i_LSUCount_5(count_wire),
+    .o_FreeToIssue0_1(freeToIssue0_wire),
+    .o_FreeToIssue1_1(freeToIssue1_wire),
+    .io_empty_1(empty_wire),
+    .io_IsFirst_1(isFirst_wire),
+    .i_InstructionToLSUIssue_113(instruction_wire),
+    .i_DriveFromWriteBack_1(driveFromWriteBack_wire),
+    .o_FreeToWriteBack_1(freeToWriteBack_wire),
+    .i_DriveFromIssue_1(driveFromIssue_wire),
+    .o_FreeToIssue_1(freeToIssue_wire),
+    .i_FreeBypassFifoToLSUIssue(fifoToLSUIssue_wire),
+    .o_DriveLSUIssueToBypassFifo(driveLSUIssueToBypassFifo_wire),
+    .i_DriveBypassFifoToLSUIssue(driveBypassFifoToLSUIssue_wire),
+    .o_FreeLSUIssueToBypassBuffer(freeLSUIssueToBypassBuffer_wire)
 );
+
 
 
 

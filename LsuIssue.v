@@ -4,9 +4,9 @@ module LsuIssue (
     input wire i_LSUCount_5;
     output wire o_FreeToIssue0_1,
     output wire o_FreeToIssue1_1            
-    inout reg io_empty_1;
-    inout reg io_IsFirst_1;
-    input reg [15:0] i_InstructionToLSUIssue_113 [0:112];
+    inout wire io_empty_1;
+    inout wire io_IsFirst_1;
+    input wire [1807:0] i_InstructionToLSUIssue_113; 
 
     input  wire  i_DriveFromWriteBack_1;
     output wire  o_FreeToWriteBack_1;
