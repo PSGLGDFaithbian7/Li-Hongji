@@ -2,7 +2,7 @@ module depCheck (
     input           rstn,
     input           i_driveFromDecoder_1,
     output          o_freeToDecoder_1,
- 
+ //位宽修改
     input   [104:0] i_uopcoder0_105,
     input   [104:0] i_uopcoder1_105,
     input   [104:0] i_uopcoder2_105,
@@ -14,26 +14,26 @@ module depCheck (
     input   [104:0] i_uopcoder8_105,
  
 
-input wire i_FreeFromBranch;
-output wire o_DriveFromDep;
+    input wire i_FreeFromBranch;
+    output wire o_DriveFromDep;
 
-    
-output wire [112:0] o_InstructionToBranch0_113;
-output wire [112:0] o_InstructionToBranch1_113;
-output wire [112:0] o_InstructionToBranch2_113;
-output wire [112:0] o_InstructionToBranch3_113;
-output wire [112:0] o_InstructionToBranch4_113;
-output wire [112:0] o_InstructionToBranch5_113;
-output wire [112:0] o_InstructionToBranch6_113;
-output wire [112:0] o_InstructionToBranch7_113;
-output wire [112:0] o_InstructionToBranch8_113;
-output wire [112:0] o_InstructionToBranch9_113;
-output wire [112:0] o_InstructionToBranch10_113;
-output wire [112:0] o_InstructionToBranch11_113;
-output wire [112:0] o_InstructionToBranch12_113;
-output wire [112:0] o_InstructionToBranch13_113;
-output wire [112:0] o_InstructionToBranch14_113;
-output wire [112:0] o_InstructionToBranch15_113;
+        
+    output wire [112:0] o_InstructionToBranch0_113;
+    output wire [112:0] o_InstructionToBranch1_113;
+    output wire [112:0] o_InstructionToBranch2_113;
+    output wire [112:0] o_InstructionToBranch3_113;
+    output wire [112:0] o_InstructionToBranch4_113;
+    output wire [112:0] o_InstructionToBranch5_113;
+    output wire [112:0] o_InstructionToBranch6_113;
+    output wire [112:0] o_InstructionToBranch7_113;
+    output wire [112:0] o_InstructionToBranch8_113;
+    output wire [112:0] o_InstructionToBranch9_113;
+    output wire [112:0] o_InstructionToBranch10_113;
+    output wire [112:0] o_InstructionToBranch11_113;
+    output wire [112:0] o_InstructionToBranch12_113;
+    output wire [112:0] o_InstructionToBranch13_113;
+    output wire [112:0] o_InstructionToBranch14_113;
+    output wire [112:0] o_InstructionToBranch15_113;
 
 );
      
@@ -93,7 +93,7 @@ output wire [112:0] o_InstructionToBranch15_113;
 
  reg [104:0] r_Insruction [0:4] ;
 
-    
+ //赋值方式，对应位信息   
 always @(posedge w_fire01 or negedge rstn)begin
        if(!rstn) begin
      dest[0]       = 0;
@@ -358,7 +358,7 @@ else begin
 end
 end
 
-
+//只允许第二次数据来的时候驱动
 always@(posedge w_fire02 or negedge rstn) begin
     if(!rstn) begin
         r_counter <= 1'b0;
@@ -371,7 +371,7 @@ end
 wire w_Drive_From_Fifo1;
 wire w_Free_To_Fifo1;
 
-
+//permit
  cFifo2  cFifo1(
         .i_drive(w_Drive_from_Fifo0),
         .i_freeNext(w_Free_To_Fifo1),
@@ -386,10 +386,10 @@ wire w_Free_To_Fifo1;
 reg [3:0] r_DepL [0:3];
 reg [3:0] r_DepR [0:3];
 
-
-always@(posedge w_fire11 or negedge rstn)begin
+//算法检查
 integer   j;
 integer   k;
+always@(posedge w_fire11 or negedge rstn)begin
 if(!rstn) begin
 for(j=1;j<16;j=j+1)begin
 for(k=0;k<16;k=k+1)begin
@@ -417,17 +417,18 @@ end
 end
 
 
-always@(posedge w_fire12 or negedge rstn)begin
 integer  i;
+always@(posedge w_fire12 or negedge rstn)begin
 if(!rstn)begin
     for(i=0;i<16;i=i+1)begin
         r_DepR[i] <=4'hF;
         r_DepL[i] <=4'hF;
     end
 end
+//casex使用方式是否正确
 
 for(i=0;i<16;i=i+1)begin
-    case(r_rawDepl[i])
+    casex(r_rawDepl[i])
     16'b01xx_xxxx_xxxx_xxxx:begin r_DepL[i] <= 4'hE end;
     16'b001x_xxxx_xxxx_xxxx:begin r_DepL[i] <= 4'hD end;
     16'b0001_xxxx_xxxx_xxxx:begin r_DepL[i] <= 4'hC end;
@@ -441,10 +442,10 @@ for(i=0;i<16;i=i+1)begin
     16'b01xx_0000_0000_1xxx:begin r_DepL[i] <= 4'h4 end;
     16'b0000_0000_0000_01xx:begin r_DepL[i] <= 4'h3 end;
     16'b0000_0000_0000_001x:begin r_DepL[i] <= 4'h2 end;
-    16'b0000_0000_0000_0001:begin r_DepL[i] <=4'h1  end;
+    16'b0000_0000_0000_0001:begin r_DepL[i] <= 4'h1  end;
     default:r_DepL[i] <= 4'hF;
 endcase
-    case(r_rawDepr[i])
+    casex(r_rawDepr[i])
     16'b01xx_xxxx_xxxx_xxxx:begin r_DepR[i] <= 4'hE end;
     16'b001x_xxxx_xxxx_xxxx:begin r_DepR[i] <= 4'hD end;
     16'b0001_xxxx_xxxx_xxxx:begin r_DepR[i] <= 4'hC end;

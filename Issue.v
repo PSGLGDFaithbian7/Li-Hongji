@@ -235,6 +235,7 @@ reg  [4:0]  r_LsuBinnaryNext_5;
 reg   [4:0]  r_LsuGray_5;
 reg   [4:0]  r_LsuBinnary_5;
 
+reg [15:0] r_AluPermit_16 ;
 
 assign w_LsuBinnaryNext_5  = r_LsuBinnary_5 + 5'b00001;
 assign w_LsuGrayNext_5 = (w_LsuBinnaryNext_5>>1) ^ w_LsuBinnaryNext_5; 
@@ -384,8 +385,45 @@ end
 
 //启动Issue
 
+cCopyFork2_32b my_cCopyFork2_32b_inst (
+    .i_drive(i_drive),
+    .i_freeNext0(i_freeNext0),
+    .i_freeNext1(i_freeNext1),
+    .rst(rst),
+    .i_data_32(i_data_32),
+    .o_free(o_free),
+    .o_driveNext0(o_driveNext0),
+    .o_driveNext1(o_driveNext1),
+    .o_data0(o_data0),
+    .o_data1(o_data1)
+);
 
 
+cCondFork5_32b u_cCondFork5_0 (
+    .i_drive(i_drive),
+    .i_freeNext0(i_freeNext0), .i_freeNext1(i_freeNext1), .i_freeNext2(i_freeNext2),
+    .i_freeNext3(i_freeNext3), .i_freeNext4(i_freeNext4),
+    .valid0(valid0), .valid1(valid1), .valid2(valid2), .valid3(valid3), .valid4(valid4),
+    .rst(rst), .i_data_32(i_data_32),
+    .o_free(o_free),
+    .o_driveNext0(o_driveNext0), .o_driveNext1(o_driveNext1), .o_driveNext2(o_driveNext2),
+    .o_driveNext3(o_driveNext3), .o_driveNext4(o_driveNext4),
+    .o_data0_32(o_data0_32), .o_data1_32(o_data1_32), .o_data2_32(o_data2_32),
+    .o_data3_32(o_data3_32), .o_data4_32(o_data4_32)
+  );
+
+cCondFork5_32b  u_cCondFork5_1 (
+    .i_drive(i_drive),
+    .i_freeNext0(i_freeNext0), .i_freeNext1(i_freeNext1), .i_freeNext2(i_freeNext2),
+    .i_freeNext3(i_freeNext3), .i_freeNext4(i_freeNext4),
+    .valid0(valid0), .valid1(valid1), .valid2(valid2), .valid3(valid3), .valid4(valid4),
+    .rst(rst), .i_data_32(i_data_32),
+    .o_free(o_free),
+    .o_driveNext0(o_driveNext0), .o_driveNext1(o_driveNext1), .o_driveNext2(o_driveNext2),
+    .o_driveNext3(o_driveNext3), .o_driveNext4(o_driveNext4),
+    .o_data0_32(o_data0_32), .o_data1_32(o_data1_32), .o_data2_32(o_data2_32),
+    .o_data3_32(o_data3_32), .o_data4_32(o_data4_32)
+  );
 //例化issue
 
 wire [15:0]   i_DriveFromGRF_16;
