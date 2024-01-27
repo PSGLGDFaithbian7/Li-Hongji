@@ -19,6 +19,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 //lsu再加一条一样的
 
+//csr指令先写回
+
 module BypassBuffer(
   rstn, 
  //发射缓冲
@@ -538,7 +540,7 @@ endgenerate
             .o_fire_1()
         );
 
-
+//该模块目前不存在
    cMutexMerge20_32b MutexMergeCsr(
         .i_drive0(w_DriveToMutexMergeCsr_20[0]),
         .i_drive1(w_DriveToMutexMergeCsr_20[1]),
@@ -585,7 +587,7 @@ endgenerate
         .i_freeNext(w_FreeFromBypassPmtFifoCsr_1),
         .rst(rstn),
 
-.o_free0(w_FreeFromMutexMergeCsr_20[0]),
+        .o_free0(w_FreeFromMutexMergeCsr_20[0]),
         .o_free1(w_FreeFromMutexMergeCsr_20[1]),
         .o_free2(w_FreeFromMutexMergeCsr_20[2]),
         .o_free3(w_FreeFromMutexMergeCsr_20[3]),
@@ -611,6 +613,7 @@ endgenerate
         .o_driveNext(w_DriveToBypassPmtFifoCsr_1),
         .o_data_32()
     );
+
 //Merge
 
 
@@ -721,7 +724,7 @@ cFifo LsaLFifo (
 
 assign {w_fire0_LsaL_1,w_fire1_LsaL_1} = w_fire_LsaL_1;
 
-
+//语法错误
 always@(posedge w_fire0_LsaL_1 or negedge rstn) begin
        if(!rstn) begin
            r_LsaLDep_4 <= 4'b0;
@@ -1008,7 +1011,7 @@ always@(posedge w_fire0_LsaR_1 or negedge rstn) begin
 end
 
      
-
+//
 
 always@(posedge w_fire1_LsaR_1 or negedge rstn) begin
        if(!rstn) begin

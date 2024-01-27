@@ -38,7 +38,8 @@ module depCheck (
 );
      
     wire    o_driveNext1,i_freeNext1;
-    wire [1:0] w_fire1_2;
+    wire  w_fire1_1;
+
     wire [1:0] w_fire0_2;
     wire [112:0]  w_inst0_113;
     wire [112:0]  w_inst1_113;
@@ -96,265 +97,282 @@ module depCheck (
  //赋值方式，对应位信息   
 always @(posedge w_fire01 or negedge rstn)begin
        if(!rstn) begin
-     dest[0]       = 0;
-     srcr[0]      = 0;
-     srcl[0]      = 0;
-     destValid[0] = 0;
-     srcrValid[0] = 0;
-     srclValid[0] = 0;
-     index[0]     = 0;
-     dest[1]      = 0;
-     srcr[1]      = 0;
-     srcl[1]      = 0;
-     destValid[1] = 0;
-     srcrValid[1] = 0;
-     srclValid[1] = 0;
-     index[1]     = 0;
-     dest[2]      = 0;
-     srcr[2]      = 0;
-     srcl[2]      = 0;
-     destValid[2] = 0;
-     srcrValid[2] = 0;
-     srclValid[2] = 0;
-     index[2]     = 0;
-     dest[3]      = 0;
-     srcr[3]      = 0;
-     srcl[3]      = 0;
-     destValid[3] = 0;
-     srcrValid[3] = 0;
-     srclValid[3] = 0;
-     index[3]     = 0;
-     dest[4]      = 0;
-     srcr[4]      = 0;
-     srcl[4]      = 0;
-     destValid[4] = 0;
-     srcrValid[4] = 0;
-     srclValid[4] = 0;
-     index[4]     = 0;
-     dest[5]      = 0;
-     srcr[5]      = 0;
-     srcl[5]      = 0;
-     destValid[5] = 0;
-     srcrValid[5] = 0;
-     srclValid[5] = 0;
-     index[5]     = 0;
-     dest[6]      = 0;
-     srcr[6]      = 0;
-     srcl[6]      = 0;
-     destValid[6] = 0;
-     srcrValid[6] = 0;
-     srclValid[6] = 0;
-     index[6]     = 0;
-     dest[7]      =0;
-     srcr[7]      = 0;
-     srcl[7]      = 0;
-     destValid[7] = 0;
-     srcrValid[7] = 0;
-     srclValid[7] = 0;
-     index[7]     = 0;
-     dest[8]       = 0;
-     srcr[8]       = 0;
-     srcl[8]       = 0;
-     destValid[8]  = 0;
-     srcrValid[8]  = 0;
-     srclValid[8]  = 0;
-     index[8]      = 0;
-     dest[9]       = 0;
-     srcr[9]       = 0;
-     srcl[9]       = 0;
-     destValid[9]  = 0;
-     srcrValid[9]  = 0;
-     srclValid[9]  =0;
-     index[9]      = 0;
-     dest[10]      = 0;
-     srcr[10]      = 0;
-     srcl[10]      = 0;
-     destValid[10] = 0;
-     srcrValid[10] = 0;
-     srclValid[10] = 0;
-     index[10]     = 0;
-     dest[11]      = 0;
-     srcl[11]      = 0;
-     destValid[11] = 0;
-     srcrValid[11] = 0;
-     srclValid[11] = 0;
-     index[11]     = 0;
-     dest[12]      = 0;
-     srcr[12]      = 0;
-     srcl[12]      = 0;
-     destValid[12] = 0;
-     srcrValid[12] = 0;
-     srclValid[12] = 0;
-     index[12]     = 0;
-     dest[13]      = 0;
-     srcr[13]      = 0;
-     srcl[13]      = 0;
-     destValid[13] = 0;
-     srcrValid[13] = 0;
-     srclValid[13] = 0;
-     index[13]     = 0;
-     dest[14]      = 0;
-     srcr[14]      = 0;
-     srcl[14]      = 0;
-     destValid[14] = 0;
-     srcrValid[14] = 0;
-     srclValid[14] = 0;
-     index[14]     = 0;
-     dest[15]      = 0;
-     srcr[15]      = 0;
-     srcl[15]      = 0;
-     destValid[15] = 0;
-     srcrValid[15] = 0;
-     srclValid[15] = 0;
-     index[15]     = 0;
-     r_Insruction[0] = 0;
-     r_Insruction[1] = 0;
-     r_Insruction[2] = 0;
-     r_Insruction[3] = 0;
-     r_Insruction[4] = 0;
-     r_Insruction[5] = 0;
-     r_Insruction[6] = 0;
-     r_Insruction[7] = 0;
-     r_Insruction[8] = 0;
-     r_Insruction[9] = 0;
-     r_Insruction[10] = 0;
-     r_Insruction[11] = 0;
-     r_Insruction[12] = 0;
-     r_Insruction[13] = 0;
-     r_Insruction[14] = 0;
-     r_Insruction[15] = 0;
+        dest[0]       <= 0;
+        srcr[0]       <= 0;
+        srcl[0]       <= 0;
+        destValid[0]  <= 0;
+        srcrValid[0]  <= 0;
+        srclValid[0]  <= 0;
+        index[0]      <= 0;
+        dest[1]       <= 0;
+        srcr[1]       <= 0;
+        srcl[1]       <= 0;
+        destValid[1]  <= 0;
+        srcrValid[1]  <= 0;
+        srclValid[1]  <= 0;
+        index[1]      <= 0;
+        dest[2]       <= 0;
+        srcr[2]       <= 0;
+        srcl[2]       <= 0;
+        destValid[2]  <= 0;
+        srcrValid[2]  <= 0;
+        srclValid[2]  <= 0;
+        index[2]      <= 0;
+        dest[3]       <= 0;
+        srcr[3]       <= 0;
+        srcl[3]       <= 0;
+        destValid[3]  <= 0;
+        srcrValid[3]  <= 0;
+        srclValid[3]  <= 0;
+        index[3]      <= 0;
+        dest[4]       <= 0;
+        srcr[4]       <= 0;
+        srcl[4]       <= 0;
+        destValid[4]  <= 0;
+        srcrValid[4]  <= 0;
+        srclValid[4]  <= 0;
+        index[4]      <= 0;
+        dest[5]       <= 0;
+        srcr[5]       <= 0;
+        srcl[5]       <= 0;
+        destValid[5]  <= 0;
+        srcrValid[5]  <= 0;
+        srclValid[5]  <= 0;
+        index[5]      <= 0;
+        dest[6]       <= 0;
+        srcr[6]       <= 0;
+        srcl[6]       <= 0;
+        destValid[6]  <= 0;
+        srcrValid[6]  <= 0;
+        srclValid[6]  <= 0;
+        index[6]      <= 0;
+        dest[7]       <= 0;
+        srcr[7]       <= 0;
+        srcl[7]       <= 0;
+        destValid[7]  <= 0;
+        srcrValid[7]  <= 0;
+        srclValid[7]  <= 0;
+        index[7]      <= 0;
+        dest[8]       <= 0;
+        srcr[8]       <= 0;
+        srcl[8]       <= 0;
+        destValid[8]  <= 0;
+        srcrValid[8]  <= 0;
+        srclValid[8]  <= 0;
+        index[8]      <= 0;
+        dest[9]       <= 0;
+        srcr[9]       <= 0;
+        srcl[9]       <= 0;
+        destValid[9]  <= 0;
+        srcrValid[9]  <= 0;
+        srclValid[9]  <= 0;
+        index[9]      <= 0;
+        dest[10]      <= 0;
+        srcr[10]      <= 0;
+        srcl[10]      <= 0;
+        destValid[10] <= 0;
+        srcrValid[10] <= 0;
+        srclValid[10] <= 0;
+        index[10]     <= 0;
+        dest[11]      <= 0;
+        srcl[11]      <= 0;
+        destValid[11] <= 0;
+        srcrValid[11] <= 0;
+        srclValid[11] <= 0;
+        index[11]     <= 0;
+        dest[12]      <= 0;
+        srcr[12]      <= 0;
+        srcl[12]      <= 0;
+        destValid[12] <= 0;
+        srcrValid[12] <= 0;
+        srclValid[12] <= 0;
+        index[12]     <= 0;
+        dest[13]      <= 0;
+        srcr[13]      <= 0;
+        srcl[13]      <= 0;
+        destValid[13] <= 0;
+        srcrValid[13] <= 0;
+        srclValid[13] <= 0;
+        index[13]     <= 0;
+        dest[14]      <= 0;
+        srcr[14]      <= 0;
+        srcl[14]      <= 0;
+        destValid[14] <= 0;
+        srcrValid[14] <= 0;
+        srclValid[14] <= 0;
+        index[14]     <= 0;
+        dest[15]      <= 0;
+        srcr[15]      <= 0;
+        srcl[15]      <= 0;
+        destValid[15] <= 0;
+        srcrValid[15] <= 0;
+        srclValid[15] <= 0;
+        index[15]     <= 0;
+        r_Insruction[0] <= 0;
+        r_Insruction[1] <= 0;
+        r_Insruction[2] <= 0;
+        r_Insruction[3] <= 0;
+        r_Insruction[4] <= 0;
+        r_Insruction[5] <= 0;
+        r_Insruction[6] <= 0;
+        r_Insruction[7] <= 0;
+        r_Insruction[8] <= 0;
+        r_Insruction[9] <= 0;
+        r_Insruction[10] <= 0;
+        r_Insruction[11] <= 0;
+        r_Insruction[12] <= 0;
+        r_Insruction[13] <= 0;
+        r_Insruction[14] <= 0;
+        r_Insruction[15] <= 0;
     end
     else if(r_counter==0) begin
-     dest[0]         = i_uopcoder0_105[4:0];
-     srcr[0]      = i_uopcoder0_105[9:5];
-     srcl[0]      = i_uopcoder0_105[14:10];
-     destValid[0] = i_uopcoder0_105[15];
-     srcrValid[0] = i_uopcoder0_105[16];
-     srclValid[0] = i_uopcoder0_105[17];
-     index[0]     = i_uopcoder0_105[65:62];
-     dest[1]      = i_uopcoder1_105[4:0];
-     srcr[1]      = i_uopcoder1_105[9:5];
-     srcl[1]      = i_uopcoder1_105[14:10];
-     destValid[1] = i_uopcoder1_105[15];
-     srcrValid[1] = i_uopcoder1_105[16];
-     srclValid[1] = i_uopcoder1_105[17];
-     index[1]     = i_uopcoder1_105[65:62];
-     dest[2]      = i_uopcoder2_105[4:0];
-     srcr[2]      = i_uopcoder2_105[9:5];
-     srcl[2]      = i_uopcoder2_105[14:10];
-     destValid[2] = i_uopcoder2_105[15];
-     srcrValid[2] = i_uopcoder2_105[16];
-     srclValid[2] = i_uopcoder2_105[17];
-     index[2]     = i_uopcoder2_105[65:62];
-     dest[3]      = i_uopcoder3_105[4:0];
-     srcr[3]      = i_uopcoder3_105[9:5];
-     srcl[3]      = i_uopcoder3_105[14:10];
-     destValid[3] = i_uopcoder3_105[15];
-     srcrValid[3] = i_uopcoder3_105[16];
-     srclValid[3] = i_uopcoder3_105[17];
-     index[3]     = i_uopcoder3_105[65:62];
-     dest[4]      = i_uopcoder4_105[4:0];
-     srcr[4]      = i_uopcoder4_105[9:5];
-     srcl[4]      = i_uopcoder4_105[14:10];
-     destValid[4] = i_uopcoder4_105[15];
-     srcrValid[4] = i_uopcoder4_105[16];
-     srclValid[4] = i_uopcoder4_105[17];
-     index[4]     = i_uopcoder4_105[65:62];
-     dest[5]      = i_uopcoder5_105[4:0];
-     srcr[5]      = i_uopcoder5_105[9:5];
-     srcl[5]      = i_uopcoder5_105[14:10];
-     destValid[5] = i_uopcoder5_105[15];
-     srcrValid[5] = i_uopcoder5_105[16];
-     srclValid[5] = i_uopcoder5_105[17];
-     index[5]     = i_uopcoder5_105[65:62];
-     dest[6]      = i_uopcoder6_105[4:0];
-     srcr[6]      = i_uopcoder6_105[9:5];
-     srcl[6]      = i_uopcoder6_105[14:10];
-     destValid[6] = i_uopcoder6_105[15];
-     srcrValid[6] = i_uopcoder6_105[16];
-     srclValid[6] = i_uopcoder6_105[17];
-     index[6]     = i_uopcoder6_105[65:62];
-     dest[7]      = i_uopcoder7_105[4:0];
-     srcr[7]      = i_uopcoder7_105[9:5];
-     srcl[7]      = i_uopcoder7_105[14:10];
-     destValid[7] = i_uopcoder7_105[15];
-     srcrValid[7] = i_uopcoder7_105[16];
-     srclValid[7] = i_uopcoder7_105[17];
-     index[7]     = i_uopcoder7_105[65:62];
-     r_Insruction[0] = i_uopcoder0_105;
-     r_Insruction[1] = i_uopcoder1_105;
-     r_Insruction[2] = i_uopcoder2_105;
-     r_Insruction[3] = i_uopcoder3_105;
-     r_Insruction[4] = i_uopcoder4_105;
-     r_Insruction[5] = i_uopcoder5_105;
-     r_Insruction[6] = i_uopcoder6_105;
-     r_Insruction[7] = i_uopcoder7_105;
+    dest[0]         <= i_uopcoder0_105[4:0];
+    srcr[0]         <= i_uopcoder0_105[9:5];
+    srcl[0]         <= i_uopcoder0_105[14:10];
+    destValid[0]    <= i_uopcoder0_105[15];
+    srcrValid[0]    <= i_uopcoder0_105[16];
+    srclValid[0]    <= i_uopcoder0_105[17];
+    index[0]        <= i_uopcoder0_105[65:62];
+    dest[1]         <= i_uopcoder1_105[4:0];
+    srcr[1]         <= i_uopcoder1_105[9:5];
+    srcl[1]         <= i_uopcoder1_105[14:10];
+    destValid[1]    <= i_uopcoder1_105[15];
+    srcrValid[1]    <= i_uopcoder1_105[16];
+    srclValid[1]    <= i_uopcoder1_105[17];
+    index[1]        <= i_uopcoder1_105[65:62];
+    dest[2]         <= i_uopcoder2_105[4:0];
+    srcr[2]         <= i_uopcoder2_105[9:5];
+    srcl[2]         <= i_uopcoder2_105[14:10];
+    destValid[2]    <= i_uopcoder2_105[15];
+    srcrValid[2]    <= i_uopcoder2_105[16];
+    srclValid[2]    <= i_uopcoder2_105[17];
+    index[2]        <= i_uopcoder2_105[65:62];
+    dest[3]         <= i_uopcoder3_105[4:0];
+    srcr[3]         <= i_uopcoder3_105[9:5];
+    srcl[3]         <= i_uopcoder3_105[14:10];
+    destValid[3]    <= i_uopcoder3_105[15];
+    srcrValid[3]    <= i_uopcoder3_105[16];
+    srclValid[3]    <= i_uopcoder3_105[17];
+    index[3]        <= i_uopcoder3_105[65:62];
+    dest[4]         <= i_uopcoder4_105[4:0];
+    srcr[4]         <= i_uopcoder4_105[9:5];
+    srcl[4]         <= i_uopcoder4_105[14:10];
+    destValid[4]    <= i_uopcoder4_105[15];
+    srcrValid[4]    <= i_uopcoder4_105[16];
+    srclValid[4]    <= i_uopcoder4_105[17];
+    index[4]        <= i_uopcoder4_105[65:62];
+    dest[5]         <= i_uopcoder5_105[4:0];
+    srcr[5]         <= i_uopcoder5_105[9:5];
+    srcl[5]         <= i_uopcoder5_105[14:10];
+    destValid[5]    <= i_uopcoder5_105[15];
+    srcrValid[5]    <= i_uopcoder5_105[16];
+    srclValid[5]    <= i_uopcoder5_105[17];
+    index[5]        <= i_uopcoder5_105[65:62];
+    dest[6]         <= i_uopcoder6_105[4:0];
+    srcr[6]         <= i_uopcoder6_105[9:5];
+    srcl[6]         <= i_uopcoder6_105[14:10];
+    destValid[6]    <= i_uopcoder6_105[15];
+    srcrValid[6]    <= i_uopcoder6_105[16];
+    srclValid[6]    <= i_uopcoder6_105[17];
+    index[6]        <= i_uopcoder6_105[65:62];
+    dest[7]         <= i_uopcoder7_105[4:0];
+    srcr[7]         <= i_uopcoder7_105[9:5];
+    srcl[7]         <= i_uopcoder7_105[14:10];
+    destValid[7]    <= i_uopcoder7_105[15];
+    srcrValid[7]    <= i_uopcoder7_105[16];
+    srclValid[7]    <= i_uopcoder7_105[17];
+    index[7]        <= i_uopcoder7_105[65:62];
+    r_Insruction[0] <= i_uopcoder0_105;
+    r_Insruction[1] <= i_uopcoder1_105;
+    r_Insruction[2] <= i_uopcoder2_105;
+    r_Insruction[3] <= i_uopcoder3_105;
+    r_Insruction[4] <= i_uopcoder4_105;
+    r_Insruction[5] <= i_uopcoder5_105;
+    r_Insruction[6] <= i_uopcoder6_105;
+    r_Insruction[7] <= i_uopcoder7_105;
+
     end
 else begin
-    dest[8]       = i_uopcoder0_105[4:0];
-     srcr[8]       = i_uopcoder0_105[9:5];
-     srcl[8]       = i_uopcoder0_105[14:10];
-     destValid[8]  = i_uopcoder0_105[15];
-     srcrValid[8]  = i_uopcoder0_105[16];
-     srclValid[8]  = i_uopcoder0_105[17];
-     index[8]      = i_uopcoder0_105[65:62];
-     dest[9]       = i_uopcoder1_105[4:0];
-     srcr[9]       = i_uopcoder1_105[9:5];
-     srcl[9]       = i_uopcoder1_105[14:10];
-     destValid[9]  = i_uopcoder1_105[15];
-     srcrValid[9]  = i_uopcoder1_105[16];
-     srclValid[9]  = i_uopcoder1_105[17];
-     index[9]      = i_uopcoder1_105[65:62];
-     dest[10]      = i_uopcoder2_105[4:0];
-     srcr[10]      = i_uopcoder2_105[9:5];
-     srcl[10]      = i_uopcoder2_105[14:10];
-     destValid[10] = i_uopcoder2_105[15];
-     srcrValid[10] = i_uopcoder2_105[16];
-     srclValid[10] = i_uopcoder2_105[17];
-     index[10]     = i_uopcoder2_105[65:62];
-     dest[11]      = i_uopcoder3_105[4:0];
-     srcr[11]      = i_uopcoder3_105[9:5];
-     srcl[11]      = i_uopcoder3_105[14:10];
-     destValid[11] = i_uopcoder3_105[15];
-     srcrValid[11] = i_uopcoder3_105[16];
-     srclValid[11] = i_uopcoder3_105[17];
-     index[11]     = i_uopcoder3_105[65:62];
-     dest[12]      = i_uopcoder4_105[4:0];
-     srcr[12]      = i_uopcoder4_105[9:5];
-     srcl[12]      = i_uopcoder4_105[14:10];
-     destValid[12] = i_uopcoder4_105[15];
-     srcrValid[12] = i_uopcoder4_105[16];
-     srclValid[12] = i_uopcoder4_105[17];
-     index[12]     = i_uopcoder4_105[65:62];
-     dest[13]      = i_uopcoder5_105[4:0];
-     srcr[13]      = i_uopcoder5_105[9:5];
-     srcl[13]      = i_uopcoder5_105[14:10];
-     destValid[13] = i_uopcoder5_105[15];
-     srcrValid[13] = i_uopcoder5_105[16];
-     srclValid[13] = i_uopcoder5_105[17];
-     index[13]     = i_uopcoder5_105[65:62];
-     dest[14]      = i_uopcoder6_105[4:0];
-     srcr[14]      = i_uopcoder6_105[9:5];
-     srcl[14]      = i_uopcoder6_105[14:10];
-     destValid[14] = i_uopcoder6_105[15];
-     srcrValid[14] = i_uopcoder6_105[16];
-     srclValid[14] = i_uopcoder6_105[17];
-     index[14]     = i_uopcoder6_105[65:62];
-     dest[15]      = i_uopcoder7_105[4:0];
-     srcr[15]      = i_uopcoder7_105[9:5];
-     srcl[15]      = i_uopcoder7_105[14:10];
-     destValid[15] = i_uopcoder7_105[15];
-     srcrValid[15] = i_uopcoder7_105[16];
-     srclValid[15] = i_uopcoder7_105[17];
-     index[15]     = i_uopcoder7_105[65:62];
+        // For index 8
+    dest[8]       <= i_uopcoder0_105[4:0];
+    srcr[8]       <= i_uopcoder0_105[9:5];
+    srcl[8]       <= i_uopcoder0_105[14:10];
+    destValid[8]  <= i_uopcoder0_105[15];
+    srcrValid[8]  <= i_uopcoder0_105[16];
+    srclValid[8]  <= i_uopcoder0_105[17];
+    index[8]      <= i_uopcoder0_105[65:62];
     r_Insruction[8] = i_uopcoder0_105;
-     r_Insruction[9] = i_uopcoder1_105;
-     r_Insruction[10] = i_uopcoder2_105;
-     r_Insruction[11] = i_uopcoder3_105;
-     r_Insruction[12] = i_uopcoder4_105;
-     r_Insruction[13] = i_uopcoder5_105;
-     r_Insruction[14] = i_uopcoder6_105;
-     r_Insruction[15] = i_uopcoder7_105;
+
+    // For index 9
+    dest[9]       <= i_uopcoder1_105[4:0];
+    srcr[9]       <= i_uopcoder1_105[9:5];
+    srcl[9]       <= i_uopcoder1_105[14:10];
+    destValid[9]  <= i_uopcoder1_105[15];
+    srcrValid[9]  <= i_uopcoder1_105[16];
+    srclValid[9]  <= i_uopcoder1_105[17];
+    index[9]      <= i_uopcoder1_105[65:62];
+    r_Insruction[9] = i_uopcoder1_105;
+
+    // For index 10
+    dest[10]       <= i_uopcoder2_105[4:0];
+    srcr[10]       <= i_uopcoder2_105[9:5];
+    srcl[10]       <= i_uopcoder2_105[14:10];
+    destValid[10]  <= i_uopcoder2_105[15];
+    srcrValid[10]  <= i_uopcoder2_105[16];
+    srclValid[10]  <= i_uopcoder2_105[17];
+    index[10]      <= i_uopcoder2_105[65:62];
+    r_Insruction[10] = i_uopcoder2_105;
+
+    // For index 11
+    dest[11]       <= i_uopcoder3_105[4:0];
+    srcr[11]       <= i_uopcoder3_105[9:5];
+    srcl[11]       <= i_uopcoder3_105[14:10];
+    destValid[11]  <= i_uopcoder3_105[15];
+    srcrValid[11]  <= i_uopcoder3_105[16];
+    srclValid[11]  <= i_uopcoder3_105[17];
+    index[11]      <= i_uopcoder3_105[65:62];
+    r_Insruction[11] = i_uopcoder3_105;
+
+    // For index 12
+    dest[12]       <= i_uopcoder4_105[4:0];
+    srcr[12]       <= i_uopcoder4_105[9:5];
+    srcl[12]       <= i_uopcoder4_105[14:10];
+    destValid[12]  <= i_uopcoder4_105[15];
+    srcrValid[12]  <= i_uopcoder4_105[16];
+    srclValid[12]  <= i_uopcoder4_105[17];
+    index[12]      <= i_uopcoder4_105[65:62];
+    r_Insruction[12] = i_uopcoder4_105;
+
+    // For index 13
+    dest[13]       <= i_uopcoder5_105[4:0];
+    srcr[13]       <= i_uopcoder5_105[9:5];
+    srcl[13]       <= i_uopcoder5_105[14:10];
+    destValid[13]  <= i_uopcoder5_105[15];
+    srcrValid[13]  <= i_uopcoder5_105[16];
+    srclValid[13]  <= i_uopcoder5_105[17];
+    index[13]      <= i_uopcoder5_105[65:62];
+    r_Insruction[13] = i_uopcoder5_105;
+
+    // For index 14
+    dest[14]       <= i_uopcoder6_105[4:0];
+    srcr[14]       <= i_uopcoder6_105[9:5];
+    srcl[14]       <= i_uopcoder6_105[14:10];
+    destValid[14]  <= i_uopcoder6_105[15];
+    srcrValid[14]  <= i_uopcoder6_105[16];
+    srclValid[14]  <= i_uopcoder6_105[17];
+    index[14]      <= i_uopcoder6_105[65:62];
+    r_Insruction[14] = i_uopcoder6_105;
+
+    // For index 15
+    dest[15]       <= i_uopcoder7_105[4:0];
+    srcr[15]       <= i_uopcoder7_105[9:5];
+    srcl[15]       <= i_uopcoder7_105[14:10];
+    destValid[15]  <= i_uopcoder7_105[15];
+    srcrValid[15]  <= i_uopcoder7_105[16];
+    srclValid[15]  <= i_uopcoder7_105[17];
+    index[15]      <= i_uopcoder7_105[65:62];
+    r_Insruction[15] = i_uopcoder7_105;
+
 end
 end
 
@@ -370,17 +388,20 @@ end
 
 wire w_Drive_From_Fifo1;
 wire w_Free_To_Fifo1;
-
+wire w_pmt_1 =(r_counter==1);
 //permit
- cFifo2  cFifo1(
-        .i_drive(w_Drive_from_Fifo0),
-        .i_freeNext(w_Free_To_Fifo1),
-        .rst(rstn),
-        .o_free(w_Free_To_Fifo0),
-        .o_driveNext(w_Drive_From_Fifo1),
-        .o_fire_2(w_fire1_2)
-    );
-{w_fire11,w_fire12} = w_fire1_2;
+
+
+  cPmtFifo1 cFifo1 (
+    .i_drive(w_Drive_from_Fifo0),
+    .i_freeNext(w_Free_To_Fifo1),
+    .rst(rstn),
+    .pmt(w_pmt_1),
+    .o_free(w_Free_To_Fifo0),
+    .o_driveNext(w_Drive_From_Fifo1),
+    .o_fire_1(w_fire1_1)
+  );
+
 
 
 reg [3:0] r_DepL [0:3];
@@ -389,7 +410,7 @@ reg [3:0] r_DepR [0:3];
 //算法检查
 integer   j;
 integer   k;
-always@(posedge w_fire11 or negedge rstn)begin
+always@(posedge w_fire1_1 or negedge rstn)begin
 if(!rstn) begin
 for(j=1;j<16;j=j+1)begin
 for(k=0;k<16;k=k+1)begin
@@ -416,9 +437,25 @@ for(k=0;k<16;k=k+1)begin
 end
 end
 
+wire [1:0] w_fire2_2;
+
+
+ cFifo2 cfifo2(
+       .i_drive(w_Drive_From_Fifo1),
+       .i_freeNext(i_FreeFromBranch),
+       .rst(rstn),
+       .o_free(w_Free_To_Fifo1),
+       .o_driveNext(o_DriveFromDep),
+       .o_fire_1(w_fire2_2)
+);
+
+
+
+
+
 
 integer  i;
-always@(posedge w_fire12 or negedge rstn)begin
+always@(posedge w_fire2_2[0] or negedge rstn)begin
 if(!rstn)begin
     for(i=0;i<16;i=i+1)begin
         r_DepR[i] <=4'hF;
@@ -486,21 +523,10 @@ end
         assign w_inst15_113 = {r_Insruction[15],r_DepL[15],r_DepR[15]};
 
 
-wire w_fire2;
-
-
- cFifo1 cFifo2(
-       .i_drive(w_Drive_From_Fifo1),
-       .i_freeNext(i_FreeFromBranch),
-       .rst(rstn),
-       .o_free(w_Free_To_Fifo1),
-       .o_driveNext(o_DriveFromDep),
-       .o_fire_1(w_fire2)
-);
 
 
 
-always @(posedge w_fire2 or negedge rstn) begin
+always @(posedge w_fire2_2[1] or negedge rstn) begin
         if(!rstn) begin
             r_inst0_113   <=  113'h0;
             r_inst1_113   <=  113'h0;
