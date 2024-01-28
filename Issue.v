@@ -182,6 +182,10 @@ localparam DEPTH = 16;
 reg [WIDTH-1:0] CSRIssue [DEPTH-1:0];
 reg [WIDTH-1:0] LSAIssue [DEPTH-1:0];
 reg [WIDTH-1:0] ALUIssue [DEPTH-1:0];
+reg [WIDTH-1:0] MULIssue [DEPTH-1:0];
+reg [WIDTH-1:0] DIVIssue [DEPTH-1:0];
+
+
 reg  [3:0] r_BranchStart_4;
 reg  [3:0] r_BranchStop_4;
 reg  [3:0] r_BranchFirst_4;
@@ -401,23 +405,45 @@ cCopyFork2_32b my_cCopyFork2_32b_inst (
 
 cCondFork5_32b u_cCondFork5_0 (
     .i_drive(i_drive),
-    .i_freeNext0(i_freeNext0), .i_freeNext1(i_freeNext1), .i_freeNext2(i_freeNext2),
-    .i_freeNext3(i_freeNext3), .i_freeNext4(i_freeNext4),
-    .valid0(valid0), .valid1(valid1), .valid2(valid2), .valid3(valid3), .valid4(valid4),
-    .rst(rst), .i_data_32(i_data_32),
+    .i_freeNext0(i_freeNext0), 
+    .i_freeNext1(i_freeNext1), 
+    .i_freeNext2(i_freeNext2),
+    .i_freeNext3(i_freeNext3), 
+    .i_freeNext4(i_freeNext4),
+    .valid0(valid0),
+    .valid1(valid1), 
+    .valid2(valid2), 
+    .valid3(valid3), 
+    .valid4(valid4),
+    .rst(rstn), 
+    .i_data_32(i_data_32),
     .o_free(o_free),
-    .o_driveNext0(o_driveNext0), .o_driveNext1(o_driveNext1), .o_driveNext2(o_driveNext2),
-    .o_driveNext3(o_driveNext3), .o_driveNext4(o_driveNext4),
-    .o_data0_32(o_data0_32), .o_data1_32(o_data1_32), .o_data2_32(o_data2_32),
-    .o_data3_32(o_data3_32), .o_data4_32(o_data4_32)
+    .o_driveNext0(o_driveNext0), 
+    .o_driveNext1(o_driveNext1), 
+    .o_driveNext2(o_driveNext2),
+    .o_driveNext3(o_driveNext3), 
+    .o_driveNext4(o_driveNext4),
+    .o_data0_32(o_data0_32), 
+    .o_data1_32(o_data1_32), 
+    .o_data2_32(o_data2_32),
+    .o_data3_32(o_data3_32), 
+    .o_data4_32(o_data4_32)
   );
 
 cCondFork5_32b  u_cCondFork5_1 (
     .i_drive(i_drive),
-    .i_freeNext0(i_freeNext0), .i_freeNext1(i_freeNext1), .i_freeNext2(i_freeNext2),
-    .i_freeNext3(i_freeNext3), .i_freeNext4(i_freeNext4),
-    .valid0(valid0), .valid1(valid1), .valid2(valid2), .valid3(valid3), .valid4(valid4),
-    .rst(rst), .i_data_32(i_data_32),
+    .i_freeNext0(i_freeNext0), 
+    .i_freeNext1(i_freeNext1), 
+    .i_freeNext2(i_freeNext2),
+    .i_freeNext3(i_freeNext3), 
+    .i_freeNext4(i_freeNext4),
+    .valid0(valid0), 
+    .valid1(valid1), 
+    .valid2(valid2), 
+    .valid3(valid3), 
+    .valid4(valid4),
+    .rst(rstn), 
+    .i_data_32(i_data_32),
     .o_free(o_free),
     .o_driveNext0(o_driveNext0), .o_driveNext1(o_driveNext1), .o_driveNext2(o_driveNext2),
     .o_driveNext3(o_driveNext3), .o_driveNext4(o_driveNext4),
@@ -612,7 +638,4 @@ LSUIssue myLSUInstance (
 );
 
 
-
-
- 
 endmodule

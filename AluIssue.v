@@ -632,10 +632,6 @@ cWaitMerge2_32b  cWaitMerge0(
 
 
 
-
-
-
-
 wire w_IssueFifoFire_1;
 
 

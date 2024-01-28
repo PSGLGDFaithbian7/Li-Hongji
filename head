@@ -1,0 +1,5 @@
+`define LsuType 001;
+`define CsrType 011;
+`define AluType 010;
+`define MdiType 101;
+`define BjpType 100;
