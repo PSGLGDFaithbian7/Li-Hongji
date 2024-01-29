@@ -21,7 +21,8 @@ module BranchModule(
     wire [4:0] w_opcode_CBJ_5;
     wire [3:0] w_opcode_CJALR_4;
    
-    
+    //不用计算偏移量了，用立即数
+    //opcode也不用了，直接用对应标志位
 
     //define B-type and J-type address
     wire [31:0] w_branchPC_32;

@@ -112,7 +112,7 @@ input  wire  [3:0]   i_BranchCount_4;
   reg   [DEP_WIDTH:0]       r_AllDepR[0:INSTRUCTION_NUMBER-1];
   reg   [101:0]     r_AllIncInfo[0:INSTRUCTION_NUMBER-1];
 
-  wire  [1146:0]    w_InstructionOutput_1147;
+  wire  [1839:0]    w_InstructionOutput;
 
 
   wire [1:0] w_fire0_2 ;
@@ -122,7 +122,7 @@ input  wire  [3:0]   i_BranchCount_4;
 
   wire w_Drive_BDfifoToMutexMerge;
   wire w_Free_MutexMerge0ToBDfifo;
-
+  wire [INSTRUCTION_WIDTH*INSTRUCTION_NUMBER:0] w_AllInstruction;
 
  cfifo2 BracnchDetectcFifo0(
   .i_drive(i_DriveFromDependenceCheck), 
@@ -133,8 +133,13 @@ input  wire  [3:0]   i_BranchCount_4;
   .o_fire_2(w_fire0_2)
 );
 
+
+
 always @(*) begin
-  
+  w_AllInstruction = { i_instFromDependenceCheck0_115, i_instFromDependenceCheck1_115,i_instFromDependenceCheck2_115,i_instFromDependenceCheck3_115,
+                                i_instFromDependenceCheck4_115,i_instFromDependenceCheck5_115,i_instFromDependenceCheck6_115,i_instFromDependenceCheck7_115,
+                                i_instFromDependenceCheck8_115, i_instFromDependenceCheck9_115,i_instFromDependenceCheck10_115,i_instFromDependenceCheck11_115,
+                                i_instFromDependenceCheck12_115,i_instFromDependenceCheck13_115,i_instFromDependenceCheck14_115,i_instFromDependenceCheck15_115};
 end
 
 
@@ -346,9 +351,6 @@ cFifo1 cFIFO0(
 );
 
 
-
-
-
  always @(posedge w_cFifo0Fire_1 or negedge rstn) begin 
     if(!rstn) begin
         r_count_4 <= 4'b0;
@@ -438,34 +440,28 @@ assign w_valid1_1=(~(r_BranchDepL_4==4'b1111 && r_BranchDepR_4==4'b1111)) && (r_
         end
         else begin
             for(i=0;i<16;i=i+1) begin
-            {
                 if(i<r_BranchIndex_4) begin
-                r_Instruction[72+73*i,0+73*i] <= w_AllInstruction_1443[72+73*i,0+73*i];
-                w_InstructionOutput_1147[72+73*i,0+73*i]=r_Instruction[72+73*i,0+73*i];
+                r_Instruction[i] <= w_AllInstruction[INSTRUCTION_WIDTH-1+i*INSTRUCTION_WIDTH,0+i*INSTRUCTION_WIDTH];
                 end
                 else begin
-                r_Instruction[72+73*i,0+73*i] <= `nop;     
-                w_InstructionOutput_1147[72+73*i,0+73*i]=r_Instruction[72+73*i,0+73*i];
+                [INSTRUCTION_WIDTH-1+i*INSTRUCTION_WIDTH,0+i*INSTRUCTION_WIDTH]<= 115'b0;     
                 end
-            }
             end
         end
       end
 
   always @(*) begin
      for(i=0;i<16;i=i+1) begin
-            {
                 if(i<r_BranchIndex_4) begin
-                w_InstructionOutput_1147[72+73*i,0+73*i]=r_Instruction[72+73*i,0+73*i];
+                w_InstructionOutput[INSTRUCTION_WIDTH-1+i*INSTRUCTION_WIDTH,0+i*INSTRUCTION_WIDTH]=r_Instruction[i];
                 end
                 else begin 
-                w_InstructionOutput_1147[72+73*i,0+73*i]=r_Instruction[72+73*i,0+73*i];
+                w_InstructionOutput[INSTRUCTION_WIDTH-1+i*INSTRUCTION_WIDTH,0+i*INSTRUCTION_WIDTH]=r_Instruction[i];
                 end
-            }
             end
       {o_instToIssue0_73, o_instToIssue1_73, o_instToIssue2_73, o_instToIssue3_73, o_instToIssue4_73, o_instToIssue5_73, o_instToIssue6_73, 
       o_instToIssue7_73, o_instToIssue8_73, o_instToIssue9_73, o_instToIssue10_73, o_instToIssue11_73, o_instToIssue12_73, o_instToIssue13_73, 
-      o_instToIssue14_73, o_instToIssue15_73}  =  w_InstructionOutput_1147;
+      o_instToIssue14_73, o_instToIssue15_73}  =  w_InstructionOutput;
   end  
 
 
@@ -479,26 +475,26 @@ assign w_valid1_1=(~(r_BranchDepL_4==4'b1111 && r_BranchDepR_4==4'b1111)) && (r_
     );
 
 
-    wire [72:0]  w_BranchInstruction_73;   
-    reg  [72:0]  r_BranchInstuction_73;
+    wire [INSTRUCTION_WIDTH-1:0]   w_BranchInstruction_115;   
+    reg  [INSTRUCTION_WIDTH-1:0]   r_BranchInstuction_115;
     wire [31:0]  w_BranchInstructionPC_32;
+
 
  always @(posedge w_cFifo1RFire_1 or negedge rstn) begin
      if(!rstn) begin
-      r_BranchInstuction_73 <=`nop;
-      w_dep1_4 = r_BranchInstuction_73[36:33];
-      w_dep2_4 = r_BranchInstuction_73[40:37];
-      w_BranchInstruction_73 =r_BranchInstuction_73;
-      w_BranchInstructionPC_32 = r_BranchInstuction_73[72:41]
+      r_BranchInstuction_115 <=115'b0;
     end
     else begin
-      r_BranchInstuction_73 <= w_AllInstruction_1147[72+r_BranchIndex_4*73,0+r_BranchIndex_4*73];
-      w_dep1_4 = r_BranchInstuction_73[36:33];
-      w_dep2_4 = r_BranchInstuction_73[40:37];
-      w_BranchInstructionPC_32 = r_BranchInstuction_73[72:41]
-      w_BranchInstruction_73 =r_BranchInstuction_73;
+      r_BranchInstuction_115 <= w_AllInstruction[INSTRUCTION_WIDTH-1+r_BranchIndex_4*INSTRUCTION_WIDTH,0+r_BranchIndex_4*INSTRUCTION_WIDTH];
     end
  end
+
+always @(*) begin
+      w_dep1_4 = r_BranchInstuction_115[110:107];
+      w_dep2_4 = r_BranchInstuction_115[114:111];
+      w_BranchInstruction_115 = r_BranchInstuction_115;
+      w_BranchInstructionPC_32 = r_BranchInstuction_73[106:75];
+end
 
 
 
@@ -512,7 +508,7 @@ assign w_valid1_1=(~(r_BranchDepL_4==4'b1111 && r_BranchDepR_4==4'b1111)) && (r_
    wire         w_FreeFromMutexMerge1R_1;
    wire         w_FreeToMutexMerge1A_1;
    wire         w_FreeToMutexMerge1B_1;
-   wire        w_DriveTocPmtFifoFromBypass_1;
+   input wire   i_DriveTocPmtFifoFromBypass_1;
    wire        w_DriveToMutexMerge2_1;
    wire        w_FreeFromMutexMerge2_1;
 
@@ -548,7 +544,7 @@ output wire o_FreeToGRF_1;
 
 
 cPmtFifo1 cPmtFifo_FromBypass(
-        .i_drive(w_DriveTocPmtFifoFromBypass_1),
+        .i_drive(i_DriveTocPmtFifoFromBypass_1),
         .i_freeNext(w_FreeMutexMerge2ToBypassPmt_1), 
         .rst(rstn),
         .pmt(w_IsDriveWithDep_1),
@@ -600,19 +596,17 @@ cFifo1 BranchFifo(
     wire [31:0] w_bypass_oprandR_32;
     wire [31:0] w_final_oprandL_32;
     wire [31:0] w_final_oprandR_32;
-    
-
-
-
 
    wire [31:0]  w_final_oprandL_32;
    wire  [31:0]  w_final_oprandR_32;
 
 
+
+
    if(w_dep1_4==4'b1111) begin
     assign w_final_oprandL_32=i_OprandFromGrfL_32;
     else
-      assign  w_final_oprandL_32=w_bypass_oprandL_32;
+    assign  w_final_oprandL_32=w_bypass_oprandL_32;
     end
 
     if(w_dep2_4==4'b1111) begin
@@ -623,7 +617,7 @@ cFifo1 BranchFifo(
 
 
 BranchModule  BranchModule (  
-      .i_inst_32(w_BranchInstruction_73),    
+      .i_inst_32(w_BranchInstruction_115),    
       .i_addr_32(w_BranchInstructionPC_32),    
 	  .i_OprandL_32(w_final_oprandL_32),
       .i_OprandR_32(w_final_oprandR_32),
@@ -631,6 +625,8 @@ BranchModule  BranchModule (
       .o_isBranch_1 (w_IsBranch_1)     
 );
       
+
+ 
      
      reg [3:0] r_CountBranch_4;
        always @(posedge w_fireCfifo2_1 or negedge rstn)  begin
@@ -746,15 +742,14 @@ cPmtFifo1 cPmtFifo_ToIssue(
             }
             end
            
-
-               {o_instToIssue0_73, o_instToIssue1_73, o_instToIssue2_73, o_instToIssue3_73, o_instToIssue4_73, o_instToIssue5_73, o_instToIssue6_73, 
+        end
+            end
+                         {o_instToIssue0_73, o_instToIssue1_73, o_instToIssue2_73, o_instToIssue3_73, o_instToIssue4_73, o_instToIssue5_73, o_instToIssue6_73, 
               o_instToIssue7_73, o_instToIssue8_73, o_instToIssue9_73, o_instToIssue10_73, o_instToIssue11_73, o_instToIssue12_73, o_instToIssue13_73, 
               o_instToIssue14_73, o_instToIssue15_73}  =  w_InstructionOutput_1147;
 
               o_BranchIndexNow_4=w_BranchIndexNow_4;
-              o_BranchIndexNext_4=w_BranchIndexNext_4;
-        end
-            end
+              o_BranchIndexNext_4=w_BranchIndexNext_4; 
       //十六条结束以后复位成空指令
 
 endmodule
