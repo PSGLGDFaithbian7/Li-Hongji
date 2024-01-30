@@ -582,35 +582,21 @@ wire        w_FreeFromMutexMerge2_1;
 
 wire w_dep1_4;
 wire w_dep2_4;
-
-wire w_DriveWithDep_1;
 wire w_IsDriveWithDep_1;
-
-wire [3:0]  w_countD_4;
 wire [31:0] w_BranchPC_32;
 wire        w_IsBranch_1;
 
-
-wire [3:0]  w_countQ_4;
-wire [31:0] o_BranchPC_32;
-wire        o_IsBranch_1;
-
-reg [3:0]   r_count_4;
 reg [31:0]  r_BranchPC_32;
 reg         r_IsBranch_1;
 
-
-  
-assign w_IsDriveWithDep_1=(w_dep1_4==4'b0|w_dep2_4==4'b0) ? 1'b1: 1'b0 ;
-assign w_IsDriveWithGRF_1=~(w_IsDriveWithDep_1);
 wire   w_FreeMutexMerge2ToBypassPmt_1;
 wire   w_FreeMutexMerge2ToGRFPmt_1;
 wire   w_DriveGRFPmtToMutexMerge2_1;
 wire   w_DriveBypassPmtToMutexMerge2_1;
 output wire o_FreeToGRF_1;
-
-
-
+  
+assign w_IsDriveWithDep_1=(w_dep1_4==4'b0|w_dep2_4==4'b0) ? 1'b1: 1'b0 ;
+assign w_IsDriveWithGRF_1=~(w_IsDriveWithDep_1);
 
 cPmtFifo1 cPmtFifo_FromBypass(
         .i_drive(i_DriveTocPmtFifoFromBypass_1),
