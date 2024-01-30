@@ -251,6 +251,9 @@ integer CsrAddress;
 integer CsrInitial;
 integer LsuInitial;
 
+
+
+
 always@(posedge  w_fire01_1 or negedge rstn ) begin
 if(!rstn)begin
 //

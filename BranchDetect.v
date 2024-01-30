@@ -617,7 +617,7 @@ cFifo1 BranchFifo(
 
 
 BranchModule  BranchModule (  
-      .i_inst_32(w_BranchInstruction_115),    
+      .i_inst_115(w_BranchInstruction_115),    
       .i_addr_32(w_BranchInstructionPC_32),    
 	  .i_OprandL_32(w_final_oprandL_32),
       .i_OprandR_32(w_final_oprandR_32),
