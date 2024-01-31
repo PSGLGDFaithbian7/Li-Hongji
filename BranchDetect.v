@@ -104,7 +104,6 @@ input  wire  [3:0]   i_BranchCount_4;
 
   //wire              w_DriveMutexMerge0TocFifo0;
   reg   [INSTRUCTION_NUMBER:0]      r_BranchListInitial_16;
-  reg   [INDEX_WIDTH:0]       r_BranchFirst_4;
   reg   [2:0]       r_AllOpcode[0:INSTRUCTION_NUMBER-1];
   reg   [DEP_WIDTH:0]       r_AllDepL[0:INSTRUCTION_NUMBER-1];
   reg   [DEP_WIDTH:0]       r_AllDepR[0:INSTRUCTION_NUMBER-1];
@@ -769,20 +768,34 @@ cPmtFifo1 cFifo_ToIssue(
 
 
 reg r_OutIsBranch_1;
-output wire o_OutIsBranch_1;
+reg [INDEX_WIDTH:0] r_BranchFirst_4;
+reg [INDEX_WIDTH:0] r_BranchStart_4;
+reg [INDEX_WIDTH:0] r_BranchStop_4;
 
+output wire [INDEX_WIDTH:0] o_BranchFirst_4;
+output wire [INDEX_WIDTH:0] o_BranchStart_4;
+output wire [INDEX_WIDTH:0] o_BranchStop_4;
+output wire o_OutIsBranch_1;
 
 always @(posedge w_IssueFifoFire_1 or negedge rstn) begin
         if(!rstn) begin
-            r_OutIsBranch_1 <= 0; 
+            r_OutIsBranch_1 <= 0;
+            r_BranchFirst_4 <= 4'b0;
+            r_BranchStart_4 <= 4'b0;
+            r_BranchStop_4  <= 4'b0; 
         end
         else begin
-          r_OutIsBranch_1 <=r_IsBranch_1;  
+            r_OutIsBranch_1 <=r_IsBranch_1;
+            r_BranchFirst_4 <= r_BranchIndexFirst_4;
+            r_BranchStart_4 <= r_BranchIndex_4;
+            r_BranchStop_4  <= w_BranchIndex_4; 
         end
       end
 
 assign o_OutIsBranch_1 = r_OutIsBranch_1;
-
+assign o_BranchFirst_4 = o_BranchFirst_4;
+assign o_BranchStart_4 = o_BranchStart_4;
+assign o_BranchStop_4 =  o_BranchStop_4;
 
 reg [INSTRUCTION_WIDTH-1:0] r_InstructionB[0:INSTRUCTION_NUMBER-1];
 

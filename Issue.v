@@ -179,6 +179,7 @@ assign w_AllOpcode_142={ o_instToIssue0_73[6:0], o_instToIssue1_73[6:0],o_instTo
 
 localparam WIDTH = 32;  
 localparam DEPTH = 16;
+
 reg [WIDTH-1:0] CSRIssue [DEPTH-1:0];
 reg [WIDTH-1:0] LSAIssue [DEPTH-1:0];
 reg [WIDTH-1:0] ALUIssue [DEPTH-1:0];
@@ -216,7 +217,7 @@ if(!rstn) begin
     r_BranchStop_4 <= 4'b0;
 end
 else  begin
-    r_BranchFirst_4= w_BranchIndex_4;
+    r_BranchFirst_4 <= w_BranchIndex_4;
     r_BranchStart_4 <= o_BranchIndexNow_4;
     r_BranchStop_4 <= o_BranchIndexNext_4;
 end
