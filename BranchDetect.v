@@ -718,6 +718,8 @@ wire   w_cPmtFifo1Fire_1;
 output wire [31:0] o_BranchPC_32;
 
 assign w_PmtIFFifo_1=(r_BranchCount_4 >= r_count_4) && (r_IsBranch_1==1);
+output wire o_DriveToIF;
+
 
 cPmtFifo1 cPmtFifo_ToIF(
         .i_drive(w_DriveCopyForkToIFFifo_1),
@@ -725,7 +727,7 @@ cPmtFifo1 cPmtFifo_ToIF(
         .rst(rstn),
         .pmt(w_PmtIFFifo_1),
         .o_free(w_FreeIFFifoCopyToFork_1),
-        .o_driveNext(o_DriveToIssue_1),
+        .o_driveNext(o_DriveToIF),
         .o_fire_1(w_cPmtFifo1Fire_1)
 );
  
@@ -749,20 +751,25 @@ wire w_PmtIssueFifo_1;
 wire w_DriveIssueFifoTocCopyFork_1;
 wire w_FreeIssueToIsueeFifo_1;
 
-input wire i_freeFromIssue_1;
+input  wire i_freeFromIssue_1;
 output wire o_driveToIssue_1;
+
+input  wire i_freeFromIssue1_1;
+output wire o_driveToIssue1_1;
+
 
 assign w_PmtIssueFifo_1=~(r_IsBranch_1);
 
-wire w_Drive_IssueFifoToIssuePmt;
-wire w_Free_IssuePmtToIssueFifo;
+
+wire w_Drive_IssuefifoToCopyFork5;
+wire w_Free_CopyFork5ToIssuefifo; 
 
 cPmtFifo1 cFifo_ToIssue(
         .i_drive(w_DriveCopyForkToIssueFifo_1),
-        .i_freeNext(w_Free_IssuePmtToIssueFifo), 
+        .i_freeNext(w_Free_CopyFork5ToIssuefifo), 
         .rst(rstn),
         .o_free(w_FreeCopyForkToIssueFifo_1),
-        .o_driveNext(w_Drive_IssueFifoToIssuePmt),
+        .o_driveNext(w_Drive_IssuefifoToCopyFork5),
         .o_fire_1(w_IssueFifoFire_1)
 );
 
@@ -799,12 +806,31 @@ assign o_BranchStop_4 =  o_BranchStop_4;
 
 reg [INSTRUCTION_WIDTH-1:0] r_InstructionB[0:INSTRUCTION_NUMBER-1];
 
+
+
+cCopyFork2_32b CopyFork5(
+          i_drive(w_Drive_IssuefifoToCopyFork5),
+          i_freeNext0(i_freeFromIssue1_1),
+          i_freeNext1(),
+          rst(rstn),
+          i_data_32(),
+          o_free(w_Free_CopyFork5ToIssuefifo),
+          o_driveNext0(o_driveToIssue1_1),
+          o_driveNext1(),
+          o_data0(),
+          o_data1()
+          );
+
+
+wire w_Drive_CopyFork5ToIssuePmt;
+wire w_Free_IssuePmtToCopyFork5; 
+
 cPmtFifo1 cPmtFifo_ToIssue(
-        .i_drive(w_Drive_IssueFifoToIssuePmt),
+        .i_drive(w_Drive_CopyFork5ToIssuePmt),
         .i_freeNext(i_freeFromIssue), 
         .rst(rstn),
         .pmt(w_PmtIssueFifo_1),
-        .o_free(w_Free_IssuePmtToIssueFifo),
+        .o_free(w_Free_IssuePmtToCopyFork5),
         .o_driveNext(o_driveToIssue),
         .o_fire_1(w_IssueFifoPmtFire_1)
 );
@@ -828,7 +854,7 @@ always @(posedge w_IssueFifoPmtFire_1 or negedge rstn) begin
 
 always @(*) begin  
   for(i=0;i<16;i=i+1) begin
-      if(r_count_4==)begin
+      if(r_count_4==1)begin
         w_InstructionOutput[INSTRUCTION_WIDTH-1+i*INSTRUCTION_WIDTH,0+i*INSTRUCTION_WIDTH]=r_Instruction[i];
       end
       else begin
