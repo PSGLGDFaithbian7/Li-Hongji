@@ -118,8 +118,8 @@ cMutexMerge2_32b MutexMerge0(
     end
 
 
-  assign  w_CsrAddress_4        =  r_binnay_5[3:0]; 
-  assign  w_binnarynext_5    =  r_binnay_5 + ~io_empty_1; 
+  assign  w_CsrAddress_4    =  r_binnay_5[3:0]; 
+  assign  w_binnarynext_5   =  r_binnay_5 + ~io_empty_1; 
   assign  w_graynext_5  =  (w_binnarynext_5>>1) ^ w_binnarynext_5; 
   assign   w_empty_1 =  (w_graynext_5 == i_CSRCount_5);
 
