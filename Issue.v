@@ -5,22 +5,22 @@ module Issue(
 //jump flag
       input wire  ;
 // data
-        input wire [72:0] i_instToIssue0_73,
-        input wire [72:0] i_instToIssue1_73,
-        input wire [72:0] i_instToIssue2_73,
-        input wire [72:0] i_instToIssue3_73, 
-        input wire [72:0] i_instToIssue4_73, 
-        input wire [72:0] i_instToIssue5_73,
-        input wire [72:0] i_instToIssue6_73, 
-        input wire [72:0] i_instToIssue7_73,
-        input wire [72:0] i_instToIssue8_73, 
-        input wire [72:0] i_instToIssue9_73, 
-        input wire [72:0] i_instToIssue10_73, 
-        input wire [72:0] i_instToIssue11_73, 
-        input wire [72:0] i_instToIssue12_73, 
-        input wire [72:0] i_instToIssue13_73, 
-        input wire [72:0] i_instToIssue14_73, 
-        input wire [72:0] i_instToIssue15_73,
+        input wire [114:0] i_instToIssue0_115,
+        input wire [114:0] i_instToIssue1_115,
+        input wire [114:0] i_instToIssue2_115,
+        input wire [114:0] i_instToIssue3_115, 
+        input wire [114:0] i_instToIssue4_115, 
+        input wire [114:0] i_instToIssue5_115,
+        input wire [114:0] i_instToIssue6_115, 
+        input wire [114:0] i_instToIssue7_115,
+        input wire [114:0] i_instToIssue8_115, 
+        input wire [114:0] i_instToIssue9_115, 
+        input wire [114:0] i_instToIssue10_115, 
+        input wire [114:0] i_instToIssue11_115, 
+        input wire [114:0] i_instToIssue12_115, 
+        input wire [114:0] i_instToIssue13_115, 
+        input wire [114:0] i_instToIssue14_115, 
+        input wire [114:0] i_instToIssue15_115,
 
         input wire [3:0] o_FirstBranchIndex_4;
 //signal
@@ -210,8 +210,6 @@ end
   
 
 
-
-
 localparam WIDTH = 32;  
 localparam DEPTH = 16;
 
@@ -225,8 +223,8 @@ reg [WIDTH-1:0] DIVIssue [0:DEPTH-1];
 reg  [3:0] r_BranchStart_4;
 reg  [3:0] r_BranchStop_4;
 reg  [3:0] r_BranchFirst_4;
-
-
+reg r_IsBranch_1;
+input wire i_isBranch;
 //为防止数据冲刷：未分配完就有新数据，可能要加延迟
 
 
@@ -235,31 +233,29 @@ reg  [3:0] r_BranchFirst_4;
 //前级数据输入
 input wire o_driveToIssue1_1;
 output wire i_freeFromIssue1_1;
-wire w_fire1_1;
+wire [1:0] w_fire1_2;
 
-
-cLastFifo1  instance_name (
-  .i_drive(o_driveToIssue1_1),          // 连接输入信号 i_drive
-  .rst(rstn),                  // 连接输入信号 rst
-  .o_free(i_freeFromIssue1_1),            // 连接输出信号 o_free
-  .o_driveNext(),  // 连接输出信号 o_driveNext
-  .o_fire_1(w_fire1_1)         // 连接输出信号 o_fire_1
+cLastFifo2  instance_name (
+  .i_drive(o_driveToIssue1_1),   
+  .rst(rstn),                
+  .o_free(i_freeFromIssue1_1),           
+  .o_driveNext(),  
+  .o_fire_1(w_fire1_2)       
 );
 
 
-
-
-
-always@(posedge w_fire1_1 or negedge rstn ) begin
+always@(posedge w_fire1_2[0] or negedge rstn ) begin
 if(!rstn) begin
     r_BranchStart_4 <= 4'b0;
     r_BranchStop_4 <= 4'b0;
     r_BranchFirst_4 <= 4'b0;
+    r_IsBranch_1 <=0;
 end
 else  begin
     r_BranchFirst_4 <= o_BranchIndexFirst_4;
     r_BranchStart_4 <= o_BranchIndexNow_4;
     r_BranchStop_4 <= o_BranchIndexNext_4;
+    r_IsBranch_1 <= i_isBranch;
 end
 
 end
@@ -267,10 +263,10 @@ end
 
 cFifo2 cFifo0(
         i_drive(o_DriveToIssue_1),
-        i_freeNext(),
+        i_freeNext(w_Free_Copyfork10TocFifo0),
         rst(rstn),
         o_free(i_freeFromIssue_1),
-        o_driveNext,
+        o_driveNext(w_Drive_ToCopyfork10),
         o_fire_2(w_fire0_2)
 );
 
@@ -290,23 +286,25 @@ assign w_CsrGrayNext_5 = (w_CsrBinnaryNext_5>>1) ^ w_CsrBinnaryNext_5;
 
 reg  [4:0]  r_LsuGrayNext_5;
 reg  [4:0]  r_LsuBinnaryNext_5;
-reg   [4:0]  r_LsuGray_5;
-reg   [4:0]  r_LsuBinnary_5;
+reg  [4:0]  r_LsuGray_5;
+reg  [4:0]  r_LsuBinnary_5;
 
-reg [15:0] r_AluPermit_16 ;
+reg [15:0]  r_AluPermit_16 ;
+
 
 assign w_LsuBinnaryNext_5  = r_LsuBinnary_5 + 5'b00001;
 assign w_LsuGrayNext_5 = (w_LsuBinnaryNext_5>>1) ^ w_LsuBinnaryNext_5; 
 
-integer i,a,b;
-integer j;
+integer i,j,a,b,c,d;
 integer LsuAddress;
 integer CsrAddress;
+integer MulAddress;
+integer DivAddress;
+integer BjpAddress;
+integer DivInitial;
+integer MulInitial;
 integer CsrInitial;
 integer LsuInitial;
-
-
-
 
 always@(posedge  w_fire00_1 or negedge rstn ) begin
 if(!rstn)begin
@@ -319,16 +317,24 @@ r_CsrBinnary_5 <= 5'b0;
 //
 LsuAddress=0;
 CsrAddress=0;
+MulAddress=0;
+DivAddress=0;
+BjpAddress=0;
+
+r_AluPermit_16 <= 16'b0;
 
 for (j= 0; j< DEPTH; j = j + 1) begin
       CSRIssue[i] <= 32'b0; // 初始化CSRIssue数组的值为0
       LSAIssue[i] <= 32'b0; // 初始化LSAIssue数组的值为0
       ALUIssue[i] <= 32'b0; // 初始化ALUIssue数组的值为0
+      MULIssue[i] <= 32'b0; // 初始化MULIssue数组的值为0
+      DIVIssue[i] <= 32'b0; // 初始化DIVIssue数组的值为0
     end
 //
-r_IsFirst_1 <= 1'b1;
 r_LsuEmpty_1 <= 1'b1;
 r_CsrEmpty_1 <= 1'b1;
+r_MulEmpty_1 <= 1'b1;
+r_DivEmpty_1 <= 1'b1;
 
 end
 //
@@ -336,10 +342,14 @@ else begin
  if (r_IsFirst_1 == 1'b1) begin
       LsuAddress=0;
       CsrAddress=0;
-  for (i=0 ;i<16;i=i+1)begin
-    if(i <= r_BranchFirst_4) begin
-        if(w_AllOpcode_142[6+7*i:7*i]==1 ||w_AllOpcode_142[6+7*i:7*i]==1|| w_AllOpcode_142[6+7*i:7*i]==1) begin
-            LSAIssue[LsuAddress] <= w_AllInstruction_1147[72+73*i,73*i];  
+      MulAddress=0;
+      DivAddress=0;
+      AluAddress=0;
+
+  for (i=0;i<16;i=i+1)begin
+    if(i <r_BranchFirst_4) begin
+        if(r_AllOpcode[2+3*i:3*i]==3'b001) begin
+            LSAIssue[LsuAddress] <= r_Instruction[114+115*i:115*i];  
             LsuAddress=LsuAddress+1;
             /*r_LsuAddress_4  <= r_LsuAddress_4 + 1'b1;
             r_LsuBinnary_5 <= w_LsuBinnaryNext_5;
@@ -348,8 +358,8 @@ else begin
                 r_LsuEmpty_1 <= 1'b0;
             end
         end
-        else if(w_AllOpcode_142[6+7*i:7*i]== 7'b1110011 ) begin
-            CSRIssue[CsrAddress]  <= w_AllInstruction_1147[72+73*i,73*i];  
+        else if(r_AllOpcode[2+3*i:3*i]==3'b011) begin
+            CSRIssue[CsrAddress]  <= r_Instruction[114+115*i:115*i];  
             CsrAddress = CsrAddress + 1;
            /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
             r_CsrGray_5 <= w_CsrGrayNext_5;*/
@@ -357,169 +367,310 @@ else begin
                 r_CsrEmpty_1 <= 1'b0;
             end
         end
-
+        else if(r_AllOpcode[2+3*i:3*i]==3'b011) begin
+            CSRIssue[CsrAddress]  <= r_Instruction[114+115*i:115*i];  
+            CsrAddress = CsrAddress + 1;
+           /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
+            r_CsrGray_5 <= w_CsrGrayNext_5;*/
+            if(r_CsrEmpty_1 == 1'b1) begin
+                r_CsrEmpty_1 <= 1'b0;
+            end
+        end
+        else if((r_AllOpcode[2+3*i:3*i]==3'b011)&(|r_AllIncInfo[i][11:8]==1'b1)) begin
+            MULIssue[MulAddress]  <= r_Instruction[114+115*i:115*i];  
+            MulAddress = MulAddress + 1;
+           /* r_MulBinnary_5 <= w_MulBinnaryNext_5;
+            r_MulGray_5 <= w_MulGrayNext_5;*/
+            if(r_MulEmpty_1 == 1'b1) begin
+                r_MulEmpty_1 <= 1'b0;
+            end
+        end
+        else if((r_AllOpcode[2+3*i:3*i]==3'b011)&(|r_AllIncInfo[i][15:12]==1'b1)) begin
+            DIVIssue[DivAddress]  <= r_Instruction[114+115*i:115*i];  
+            DivAddress = DivAddress + 1;
+           /* r_DivBinnary_5 <= w_DivBinnaryNext_5;
+            r_DivGray_5 <= w_DivGrayNext_5;*/
+            if(r_DivEmpty_1 == 1'b1) begin
+                r_DivEmpty_1 <= 1'b0;
+        end
+        end
+        else if(r_AllOpcode[2+3*i:3*i]==3'100) begin
+        BjpAddress=BjpAddress+1;
+        end
         else  begin
-            ALUIssue[i] <= w_AllInstruction_1147[72+73*i,73*i];
-                
+        ALUIssue[i] <= r_Instruction[114+115*i:115*i];
+        r_AluPermit_16[i] <= 1;
+        AluAddress=AluAddress+1;
         end
     end
     //initial
     else begin
           ALUIssue[i] <= 32'b0;  
+          r_AluPermit_16[i] <= 0;
     end
    end     
-  LsuInitial=LsuAddress;
-  CsrInitial=CsrAddress;
-  for(a=CsrInitial;a<16;a=a+1)begin
-    CsrIssue[a]<= 32'b0;  
-  end
-  for(b=LsuInitial;b<16;b=b+1)begin
-   LsuIssue[b] <= 32'b0;  
-  end
-  r_IsFirst_1<=1'b0;
+   LsuInitial=LsuAddress;
+   CsrInitial=CsrAddress;
+   MulInitial=MulAddress;
+   DivInitial=DivAddress;
+   for(a=CsrInitial;a<16;a=a+1)begin
+   CsrIssue[a] <=  0;   
+   end
+   for(b=LsuInitial;b<16;b=b+1)begin
+   LsuIssue[b] <= 0;  
+   end
+   for(c=CsrInitial;c<16;c=c+1)begin
+   MulIssue[c] <= 0;   
+   end
+   for(d=LsuInitial;d<16;d=d+1)begin
+   DivIssue[d] <= 0;  
+   end
  end
  else begin
   for (i=0;i<16;i=i+1)  begin
-        if(i >= r_BranchStart_4 || i <=  r_BranchStop_4) begin
-            if(w_AllOpcode_142[6+7*i:7*i]==7'b0101111 ||w_AllOpcode_142[6+7*i:7*i]== 7'b0000011 || w_AllOpcode_142[6+7*i:7*i]== 7'b0101111) begin
-             LSAIssue[LsuAddress] <= w_AllInstruction_1147[72+73*i,73*i];  
-             LsuAddress=LsuAddress+1;
-             /*r_LsuAddress_4  <= r_LsuAddress_4 + 1'b1;
-             r_LsuBinnary_5 <= w_LsuBinnaryNext_5;
-             r_LsuGray_5 <= w_LsuGrayNext_5;*/
-             if(r_LsuEmpty_1 == 1'b1) begin
-                r_LsuEmpty_1 <= 1'b0;
-             end
+    if(i>=r_BranchStart_4|i<=r_BranchStop_4)begin
+        if(r_AllOpcode[2+3*i:3*i]==3'b001) begin
+            LSAIssue[LsuAddress] <= r_Instruction[114+115*i:115*i];  
+            LsuAddress=LsuAddress+1;
+            /*r_LsuAddress_4  <= r_LsuAddress_4 + 1'b1;
+            r_LsuBinnary_5 <= w_LsuBinnaryNext_5;
+            r_LsuGray_5 <= w_LsuGrayNext_5;*/
+            if(r_LsuEmpty_1 == 1'b1) begin
+            r_LsuEmpty_1 <= 1'b0;
             end
-
-            else if(w_AllOpcode_142[6+7*i:7*i]== 7'b1110011 ) begin
-             CSRIssue[CsrAddress]  <= w_AllInstruction_1147[72+73*i,73*i];  
-             CsrAddress = CsrAddress + 1;
-             /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
-             r_CsrGray_5 <= w_CsrGrayNext_5;*/
-             if(r_CsrEmpty_1 == 1'b1) begin
+        end
+        else if(r_AllOpcode[2+3*i:3*i]==3'b011) begin
+            CSRIssue[CsrAddress]  <= r_Instruction[114+115*i:115*i];  
+            CsrAddress = CsrAddress + 1;
+           /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
+            r_CsrGray_5 <= w_CsrGrayNext_5;*/
+            if(r_CsrEmpty_1 == 1'b1) begin
                 r_CsrEmpty_1 <= 1'b0;
-             end
-            end
-
-            else  begin
-            ALUIssue[i] <= w_AllInstruction_1147[72+73*i,73*i];  
             end
         end
-        else begin
-            ALUIssue[i] <= ALUIssue[i];  
+        else if(r_AllOpcode[2+3*i:3*i]==3'b011) begin
+            CSRIssue[CsrAddress]  <= r_Instruction[114+115*i:115*i];  
+            CsrAddress = CsrAddress + 1;
+           /* r_CsrBinnary_5 <= w_CsrBinnaryNext_5;
+            r_CsrGray_5 <= w_CsrGrayNext_5;*/
+            if(r_CsrEmpty_1 == 1'b1) begin
+                r_CsrEmpty_1 <= 1'b0;
+            end
         end
-   end
-   LsuInitial=LsuAddress;
-   CsrInitial=CsrAddress;
-   for(a=CsrInitial;a<16;a=a+1)begin
-   CsrIssue[a]<=  CsrIssue[a];   
-   end
-   for(b=LsuInitial;b<16;b=b+1)begin
-   LsuIssue[b] <= LsuIssue[b];  
+        else if((r_AllOpcode[2+3*i:3*i]==3'b011)&(|r_AllIncInfo[i][11:8]==1'b1)) begin
+            MULIssue[MulAddress]  <= r_Instruction[114+115*i:115*i];  
+            MulAddress = MulAddress + 1;
+           /* r_MulBinnary_5 <= w_MulBinnaryNext_5;
+            r_MulGray_5 <= w_MulGrayNext_5;*/
+            if(r_MulEmpty_1 == 1'b1) begin
+                r_MulEmpty_1 <= 1'b0;
+            end
+        end
+        else if((r_AllOpcode[2+3*i:3*i]==3'b011)&(|r_AllIncInfo[i][15:12]==1'b1)) begin
+            DIVIssue[DivAddress]  <= r_Instruction[114+115*i:115*i];  
+            DivAddress = DivAddress + 1;
+           /* r_DivBinnary_5 <= w_DivBinnaryNext_5;
+            r_DivGray_5 <= w_DivGrayNext_5;*/
+            if(r_DivEmpty_1 == 1'b1) begin
+                r_DivEmpty_1 <= 1'b0;
+            end
+        end
+        else if(r_AllOpcode[2+3*i:3*i]==3'100) begin
+        BjpAddress=BjpAddress+1;        
+        end
+        else  begin
+        ALUIssue[i] <= r_Instruction[114+115*i:115*i];
+        r_AluPermit_16[i] <= 1;
+        AluAddress=AluAddress+1;
+        end
+    end
+  else begin
+        ALUIssue[i] <= 115'b0;
+        r_AluPermit_16[i] <= 0;
+        CsrIssue[i] <= CsrIssue[i];
+        MulIssue[i] <= MulIssue[i];
+        DivIssue[i] <= DivIssue[i];
+  end
    end
  end
 end
 end
 
 
-
-
+wire w_FirstDecideFire = (w_fire1_2[1]&r_IsBranch_1)|w_fire01_1;
 //有branch,置高first
-always @(negedge i_BranchDrive_1 or negedge rstn) begin
+always @(posedge  w_FirstDecideFire or negedge rstn) begin
     if (!rstn) begin
-        r_IsFirst_1 <= 0; // 复位时，r_IsFirst_1置为0
+        r_IsFirst_1 <= 1; 
     end 
-    else if begin
-      if (i_BranchEnable_1) begin
-        r_IsFirst_1 <= 1; // 当BranchEnable为高时，在下降沿将r_IsFirst_1置高
+    else  begin
+      if (w_fire1_2[1]&r_IsBranch_1) begin
+        r_IsFirst_1 <= 1; 
       end
       else begin
-        r_IsFirst_1 <= 0;
+        if(AluAddress+CsrAddress+LsuAddress+DivAddress+MulAddress+BjpAddress==16)begin
+        r_IsFirst_1 <=1;
+        else begin
+        r_IsFirst_1 <=0;
+         end
+        end
       end
     end
 end
 //
 
+wire  w_Drive_ToCopyfork10;
+wire  w_Free_Copyfork10TocFifo0;
 
+wire  w_Drive_ToCondAlu;
+wire  w_Drive_ToCsrPmtFifo;
+wire  w_Drive_ToDivPmtFifo;
+wire  w_Drive_ToMulPmtFifo;
+wire  w_Drive_ToLsuPmtFifo;
+wire  w_Drive_ToEmptyControlCsr;
+wire  w_Drive_ToEmptyControlLsu;
+wire  w_Drive_ToEmptyControlMul;
+wire  w_Drive_ToEmptyControlDiv;
+
+wire  w_Free_FromCondAlu;
+wire  w_Free_FromCsrPmtFifo;
+wire  w_Free_FromDivPmtFifo;
+wire  w_Free_FromMulPmtFifo;
+wire  w_Free_FromLsuPmtFifo;
+wire  w_Free_FromEmptyControlCsr;
+wire  w_Free_FromEmptyControlLsu;
+wire  w_Free_FromEmptyControlMul;
+wire  w_Free_FromEmptyControlDiv;
 
 //启动Issue
+cCopyFork10_32b my_cCopyFork10_32b (
+.i_drive(w_Drive_ToCopyfork10),
+.i_freeNext0(w_Free_FromCondAlu),
+.i_freeNext1(w_Free_FromCsrPmtFifo),
+.i_freeNext2(w_Free_FromDivPmtFifo),
+.i_freeNext3(w_Free_FromMulPmtFifo),
+.i_freeNext4(w_Free_FromLsuPmtFifo),
+.i_freeNext5(w_Free_FromEmptyControlCsr),
+.i_freeNext6(w_Free_FromEmptyControlLsu),
+.i_freeNext7(w_Free_FromEmptyControlMul),
+.i_freeNext8(w_Free_FromEmptyControlDiv),
+.i_freeNext9(),
+.rst(rstn),
+.i_data_32(),
+.o_free( w_Free_Copyfork10TocFifo0),
+.o_driveNext0(w_Drive_ToCondAlu),
+.o_driveNext1(w_Drive_ToCsrPmtFifo),
+.o_driveNext2(w_Drive_ToDivPmtFifo),
+.o_driveNext3(w_Drive_ToMulPmtFifo),
+.o_driveNext4(w_Drive_ToLsuPmtFifo),
+.o_driveNext5(w_Drive_ToEmptyControlCsr),
+.o_driveNext6(w_Drive_ToEmptyControlDiv),
+.o_driveNext7(w_Drive_ToEmptyControlMul),
+.o_driveNext8(w_Drive_ToEmptyControlLsu),
+.o_driveNext9(),
+.o_data0(),
+.o_data1(),
+.o_data2(),
+.o_data3(),
+.o_data4(),
+.o_data5(),
+.o_data6(),
+.o_data7(),
+.o_data8(),
+.o_data9();
 
-cCopyFork2_32b my_cCopyFork2_32b_inst (
-    .i_drive(i_drive),
-    .i_freeNext0(i_freeNext0),
-    .i_freeNext1(i_freeNext1),
-    .rst(rst),
-    .i_data_32(i_data_32),
-    .o_free(o_free),
-    .o_driveNext0(o_driveNext0),
-    .o_driveNext1(o_driveNext1),
-    .o_data0(o_data0),
-    .o_data1(o_data1)
 );
 
 
-cCondFork5_32b u_cCondFork5_0 (
-    .i_drive(i_drive),
-    .i_freeNext0(i_freeNext0), 
-    .i_freeNext1(i_freeNext1), 
-    .i_freeNext2(i_freeNext2),
-    .i_freeNext3(i_freeNext3), 
-    .i_freeNext4(i_freeNext4),
-    .valid0(valid0),
-    .valid1(valid1), 
-    .valid2(valid2), 
-    .valid3(valid3), 
-    .valid4(valid4),
-    .rst(rstn), 
-    .i_data_32(i_data_32),
-    .o_free(o_free),
-    .o_driveNext0(o_driveNext0), 
-    .o_driveNext1(o_driveNext1), 
-    .o_driveNext2(o_driveNext2),
-    .o_driveNext3(o_driveNext3), 
-    .o_driveNext4(o_driveNext4),
-    .o_data0_32(o_data0_32), 
-    .o_data1_32(o_data1_32), 
-    .o_data2_32(o_data2_32),
-    .o_data3_32(o_data3_32), 
-    .o_data4_32(o_data4_32)
-  );
 
-cCondFork5_32b  u_cCondFork5_1 (
-    .i_drive(i_drive),
-    .i_freeNext0(i_freeNext0), 
-    .i_freeNext1(i_freeNext1), 
-    .i_freeNext2(i_freeNext2),
-    .i_freeNext3(i_freeNext3), 
-    .i_freeNext4(i_freeNext4),
-    .valid0(valid0), 
-    .valid1(valid1), 
-    .valid2(valid2), 
-    .valid3(valid3), 
-    .valid4(valid4),
-    .rst(rstn), 
-    .i_data_32(i_data_32),
-    .o_free(o_free),
-    .o_driveNext0(o_driveNext0), .o_driveNext1(o_driveNext1), .o_driveNext2(o_driveNext2),
-    .o_driveNext3(o_driveNext3), .o_driveNext4(o_driveNext4),
-    .o_data0_32(o_data0_32), .o_data1_32(o_data1_32), .o_data2_32(o_data2_32),
-    .o_data3_32(o_data3_32), .o_data4_32(o_data4_32)
-  );
-//例化issue
 
-wire [15:0]   i_DriveFromGRF_16;
-wire [15:0]   i_DriveToAluIssue_16;
+wire [15:0]     i_DriveFromGRF_16;
+
 wire [1807:0]   i_InstructionToAluIssue_1807;
-wire [15:0]   i_DriveFromIssueTop_16;
-wire [15:0]   i_FreeFromGRF_16;
-wire [15:0]   i_FreeFromExe_16;
+wire [15:0]     i_DriveFromIssueTop_16;
+wire [15:0]     i_FreeFromGRF_16;
+wire [15:0]     i_FreeFromExe_16;
 
 wire [15:0]   o_FreeToIssueTop_16;
 wire [15:0]   o_DriveToGRF_16;
 wire [15:0]   o_DriveFromIssueToExe_16;
 wire [1871:0] o_InstructionToExe_1871;
 
+wire [15:0] w_DriveToAluIssue;
+wire [15:0] w_Free_AluIssueToCondFork;
+cCondFork16_32b AluIssue_cCondFork16_0 (
+    .i_drive(w_Drive_ToCondAlu),
+    .i_freeNext0(w_Free_AluIssueToCondFork[0]), 
+    .i_freeNext1(w_Free_AluIssueToCondFork[1]), 
+    .i_freeNext2(w_Free_AluIssueToCondFork[2]),
+    .i_freeNext3(w_Free_AluIssueToCondFork[3]), 
+    .i_freeNext4(w_Free_AluIssueToCondFork[4]),
+    .i_freeNext5(w_Free_AluIssueToCondFork[5]), 
+    .i_freeNext6(w_Free_AluIssueToCondFork[6]), 
+    .i_freeNext7(w_Free_AluIssueToCondFork[7]),
+    .i_freeNext8(w_Free_AluIssueToCondFork[8]), 
+    .i_freeNext9(w_Free_AluIssueToCondFork[9]),
+    .i_freeNext10(w_Free_AluIssueToCondFork[10]), 
+    .i_freeNext11(w_Free_AluIssueToCondFork[11]), 
+    .i_freeNext12(w_Free_AluIssueToCondFork[12]),
+    .i_freeNext13(w_Free_AluIssueToCondFork[13]), 
+    .i_freeNext14(w_Free_AluIssueToCondFork[14]),
+    .i_freeNext15(w_Free_AluIssueToCondFork[15]),
+    .valid0(r_AluPermit_16[0]),
+    .valid1(r_AluPermit_16[1]), 
+    .valid2(r_AluPermit_16[2]), 
+    .valid3(r_AluPermit_16[3]), 
+    .valid4(r_AluPermit_16[4]),
+    .valid5(r_AluPermit_16[5]),
+    .valid6(r_AluPermit_16[6]), 
+    .valid7(r_AluPermit_16[7]), 
+    .valid8(r_AluPermit_16[8]), 
+    .valid9(r_AluPermit_16[9]),
+    .valid10(r_AluPermit_16[10]),
+    .valid11(r_AluPermit_16[11]), 
+    .valid12(r_AluPermit_16[12]), 
+    .valid13(r_AluPermit_16[13]), 
+    .valid14(r_AluPermit_16[14]),
+    .valid15(r_AluPermit_16[15]);
+    .rst(rstn), 
+    .i_data_32(),
+    .o_free(w_Free_FromCondAlu),
+    .o_driveNext0(w_DriveToAluIssue[0]), 
+    .o_driveNext1(w_DriveToAluIssue[1]), 
+    .o_driveNext2(w_DriveToAluIssue[2]),
+    .o_driveNext3(w_DriveToAluIssue[3]), 
+    .o_driveNext4(w_DriveToAluIssue[4]),
+    .o_driveNext5(w_DriveToAluIssue[5]), 
+    .o_driveNext6(w_DriveToAluIssue[6]), 
+    .o_driveNext7(w_DriveToAluIssue[7]),
+    .o_driveNext8(w_DriveToAluIssue[8]), 
+    .o_driveNext9(w_DriveToAluIssue[9]),
+    .o_driveNext10(w_DriveToAluIssue[10]), 
+    .o_driveNext11(w_DriveToAluIssue[11]), 
+    .o_driveNext12(w_DriveToAluIssue[12]),
+    .o_driveNext13(w_DriveToAluIssue[13]), 
+    .o_driveNext14(w_DriveToAluIssue[14]),
+    .o_driveNext15(w_DriveToAluIssue[15]);
+    .o_data0_32(), 
+    .o_data1_32(), 
+    .o_data2_32(),
+    .o_data3_32(), 
+    .o_data4_32(),
+    .o_data5_32(), 
+    .o_data6_32(), 
+    .o_data7_32(),
+    .o_data8_32(), 
+    .o_data9_32(),
+    .o_data10_32(), 
+    .o_data11_32(), 
+    .o_data12_32(),
+    .o_data13_32(), 
+    .o_data14_32(),
+    .o_data15_32();
+  );
+
+
+//例化issue
 
 
 genvar k;
@@ -528,7 +679,7 @@ generate
     AluIssue IssueAlu (
     .i_DriveFromGRF_1(i_DriveFromGRF_16[k]),
     .rstn(rstn),
-    .i_DriveToAluIssue_1(i_DriveToAluIssue_16[k]),
+    .i_DriveToAluIssue_1(w_DriveToAluIssue[k]),
     .i_InstructionToAluIssue_113(i_InstructionToAluIssue_1807[112+113*k:113*k]),
     .i_DriveFromIssueTop_1(i_DriveFromIssueTop_16[k]),
     .i_FreeFromGRF_1(i_FreeFromGRF_16[k]),
@@ -652,9 +803,62 @@ generate
     .o_FreeToGRF_1(o_FreeToGRF_1)
   );        
 end
-
 endgenerate
 
+cPmtFifo1 cPmtFifo_ToCsrIssue(
+        .i_drive(w_Drive_CopyFork5ToIssuePmt),
+        .i_freeNext(i_freeFromIssue), 
+        .rst(rstn),
+        .pmt(w_PmtIssueFifo_1),
+        .o_free(w_Free_IssuePmtToCopyFork5),
+        .o_driveNext(o_driveToIssue),
+        .o_fire_1(w_IssueFifoPmtFire_1)
+);
+
+always @(posedge clk or negedge rstn) begin
+  if(!rstn) begin
+  r_CsrC  
+  end
+  else begin
+    
+  end
+end
+
+
+cMutexMerge2_32b MutexMergeCsr(
+        .i_drive0(w_DriveBypassPmtToMutexMerge2_1),
+        .i_drive1(w_DriveGRFPmtToMutexMerge2_1),
+        .i_data0_32(),
+        .i_data1_32(),
+        .i_freeNext( w_FreeBranchFifoToMutexMerge2_1),
+        .rst(rstn),
+        .o_free0(w_FreeMutexMerge2ToBypassPmt_1),
+        .o_free1(w_FreeMutexMerge2ToGRFPmt),
+        .o_driveNext(w_DriveMutexMerge2ToBranchFifo_1),
+        .o_data_32(),
+    );
+
+cLastFifo2  CsrEmpty (
+  .i_drive(o_driveToIssue1_1),   
+  .rst(rstn),                
+  .o_free(i_freeFromIssue1_1),           
+  .o_driveNext(),  
+  .o_fire_1(w_fire1_2)       
+);
+
+always @(posedge clk or negedge rstn) begin
+  if(!rstn) begin
+    r_CsrEmpty_1 <= 0;
+  end
+  else begin
+  if(i_CsrReadEmpty_1==1)begin
+    r_CsrEmpty_1 <= 1;
+  end
+  else begin
+    r_CsrEmpty_1 <= 0;
+  end
+  end
+end
 
 CsrIssue myCsrInstance (
     .rstn(rstn_wire),
