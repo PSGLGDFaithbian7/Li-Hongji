@@ -274,16 +274,6 @@ assign  w_fire00_1=w_fire0_2[0];
 assign  w_fire01_1=w_fire0_2[1];
 
 
-
-wire  [4:0]  w_CsrGrayNext_5;
-wire  [4:0]  w_CsrBinnaryNext_5;
-reg   [4:0]  r_CsrGray_5;
-reg   [4:0]  r_CsrBinnary_5;
-wire  [3:0]  w_CsrAddress_4 = r_CsrBinnary_5[3:0];
-
-assign w_CsrBinnaryNext_5  = r_CsrBinnary_5 + 5'b00001;
-assign w_CsrGrayNext_5 = (w_CsrBinnaryNext_5>>1) ^ w_CsrBinnaryNext_5; 
-
 reg  [4:0]  r_LsuGrayNext_5;
 reg  [4:0]  r_LsuBinnaryNext_5;
 reg  [4:0]  r_LsuGray_5;
@@ -805,48 +795,81 @@ generate
 end
 endgenerate
 
+//Csr
+wire w_PmtCsrIssueFifo =r_CsrEmpty_1;
+
+wire w_Drive_Cond10ToPmtCsr;
+wire w_Free_PmtCsrToCond10;
+output wire o_Drive_CsrPmtToCsrIssue;
+input  wire i_Free_CsrIssueToCsrPmt;
+wire w_CsrPmtFire;
+
 cPmtFifo1 cPmtFifo_ToCsrIssue(
-        .i_drive(w_Drive_CopyFork5ToIssuePmt),
-        .i_freeNext(i_freeFromIssue), 
+        .i_drive(w_Drive_Cond10ToPmtCsr),
+        .i_freeNext(i_Free_CsrIssueToCsrPmt), 
         .rst(rstn),
-        .pmt(w_PmtIssueFifo_1),
-        .o_free(w_Free_IssuePmtToCopyFork5),
-        .o_driveNext(o_driveToIssue),
-        .o_fire_1(w_IssueFifoPmtFire_1)
+        .pmt(w_PmtCsrIssueFifo),
+        .o_free(w_Free_PmtCsrToCond10),
+        .o_driveNext(o_Drive_CsrPmtToCsrIssu),
+        .o_fire_1(w_CsrPmtFire)
 );
 
-always @(posedge clk or negedge rstn) begin
+
+reg   [4:0]  r_CsrGray_5;
+reg   [4:0]  r_CsrBinnary_5;
+
+wire  [4:0]  w_CsrBinnary_5 = CsrAddress;
+wire  [4:0]  w_CsrGray_5;
+
+assign w_CsrGray_5 = (w_CsrBinnary_5>>1) ^ w_CsrBinnary_5; 
+
+always @(posedge w_CsrPmtFire or negedge rstn) begin
   if(!rstn) begin
-  r_CsrC  
+  r_CsrGray_5 <= 5'b0;
+  r_CsrBinnary_5 <= 5'b0;
   end
   else begin
-    
+  r_CsrGray_5 <= w_CsrBinnary_5;
+  r_CsrBinnary_5 <= w_CsrGray_5;
   end
 end
 
+output wire o_CsrBinnary_5 = r_CsrBinnary_5;
+output wire o_CsrGray_5 = r_CsrGray_5;
+
+
+wire w_Drive_MutexToCsrEmpty;
+wire w_Free_CsrEmptyToMutex;
+input wire i_Drive_CsrIssueToCsrEmpty;
+output wire o_Drive_CsrEmptyToCsrIssue;
+wire w_Drive_Cond10ToMutexCsr;
+wire w_Free_MutexCsrToCond10;
+
+
 
 cMutexMerge2_32b MutexMergeCsr(
-        .i_drive0(w_DriveBypassPmtToMutexMerge2_1),
-        .i_drive1(w_DriveGRFPmtToMutexMerge2_1),
+        .i_drive0(i_Drive_CsrIssueToCsrEmpty),
+        .i_drive1(w_Drive_Cond10ToMutexCsr),
         .i_data0_32(),
         .i_data1_32(),
-        .i_freeNext( w_FreeBranchFifoToMutexMerge2_1),
+        .i_freeNext(w_Free_CsrEmptyToMutex),
         .rst(rstn),
-        .o_free0(w_FreeMutexMerge2ToBypassPmt_1),
-        .o_free1(w_FreeMutexMerge2ToGRFPmt),
-        .o_driveNext(w_DriveMutexMerge2ToBranchFifo_1),
+        .o_free0(o_Drive_CsrEmptyToCsrIssue),
+        .o_free1(w_Free_MutexCsrToCond10),
+        .o_driveNext(w_Drive_MutexToCsrEmpty),
         .o_data_32(),
     );
 
 cLastFifo2  CsrEmpty (
-  .i_drive(o_driveToIssue1_1),   
+  .i_drive(w_Drive_MutexToCsrEmpty),   
   .rst(rstn),                
-  .o_free(i_freeFromIssue1_1),           
+  .o_free(w_Free_CsrEmptyToMutex),           
   .o_driveNext(),  
-  .o_fire_1(w_fire1_2)       
+  .o_fire_1(w_fireCsrEmpty)       
 );
+wire w_fireCsrEmpty;
 
-always @(posedge clk or negedge rstn) begin
+always @(posedge w_fireCsrEmpty or negedge rstn) begin
   if(!rstn) begin
     r_CsrEmpty_1 <= 0;
   end
@@ -878,23 +901,321 @@ CsrIssue myCsrInstance (
     .o_FreeCsrIssueToBypassBuffer(freeCsrIssueToBypassBuffer_wire)
 );
 
+//Mul
+wire w_PmtMulIssueFifo =r_MulEmpty_1;
 
-LSUIssue myLSUInstance (
+wire w_Drive_Cond10ToPmtMul;
+wire w_Free_PmtMulToCond10;
+output wire o_Drive_MulPmtToMulIssue;
+input  wire i_Free_MulIssueToMulPmt;
+wire w_MulPmtFire;
+
+cPmtFifo1 cPmtFifo_ToMulIssue(
+        .i_drive(w_Drive_Cond10ToPmtMul),
+        .i_freeNext(i_Free_MulIssueToMulPmt), 
+        .rst(rstn),
+        .pmt(w_PmtMulIssueFifo),
+        .o_free(w_Free_PmtMulToCond10),
+        .o_driveNext(o_Drive_MulPmtToMulIssu),
+        .o_fire_1(w_MulPmtFire)
+);
+
+
+reg   [4:0]  r_MulGray_5;
+reg   [4:0]  r_MulBinnary_5;
+
+wire  [4:0]  w_MulBinnary_5 = MulAddress;
+wire  [4:0]  w_MulGray_5;
+
+assign w_MulGray_5 = (w_MulBinnary_5>>1) ^ w_MulBinnary_5; 
+
+always @(posedge w_MulPmtFire or negedge rstn) begin
+  if(!rstn) begin
+  r_MulGray_5 <= 5'b0;
+  r_MulBinnary_5 <= 5'b0;
+  end
+  else begin
+  r_MulGray_5 <= w_MulBinnary_5;
+  r_MulBinnary_5 <= w_MulGray_5;
+  end
+end
+
+output wire o_MulBinnary_5 = r_MulBinnary_5;
+output wire o_MulGray_5 = r_MulGray_5;
+
+
+wire w_Drive_MutexToMulEmpty;
+wire w_Free_MulEmptyToMutex;
+input wire i_Drive_MulIssueToMulEmpty;
+output wire o_Drive_MulEmptyToMulIssue;
+wire w_Drive_Cond10ToMutexMul;
+wire w_Free_MutexMulToCond10;
+
+
+
+cMutexMerge2_32b MutexMergeMul(
+        .i_drive0(i_Drive_MulIssueToMulEmpty),
+        .i_drive1(w_Drive_Cond10ToMutexMul),
+        .i_data0_32(),
+        .i_data1_32(),
+        .i_freeNext(w_Free_MulEmptyToMutex),
+        .rst(rstn),
+        .o_free0(o_Drive_MulEmptyToMulIssue),
+        .o_free1(w_Free_MutexMulToCond10),
+        .o_driveNext(w_Drive_MutexToMulEmpty),
+        .o_data_32(),
+    );
+
+cLastFifo2  MulEmpty (
+  .i_drive(w_Drive_MutexToMulEmpty),   
+  .rst(rstn),                
+  .o_free(w_Free_MulEmptyToMutex),           
+  .o_driveNext(),  
+  .o_fire_1(w_fireMulEmpty)       
+);
+wire w_fireMulEmpty;
+
+always @(posedge w_fireMulEmpty or negedge rstn) begin
+  if(!rstn) begin
+    r_MulEmpty_1 <= 0;
+  end
+  else begin
+  if(i_MulReadEmpty_1==1)begin
+    r_MulEmpty_1 <= 1;
+  end
+  else begin
+    r_MulEmpty_1 <= 0;
+  end
+  end
+end
+
+MulIssue myMulInstance (
     .rstn(rstn_wire),
-    .i_LSUCount_5(count_wire),
+    .i_MulCount_5(count_wire),
     .o_FreeToIssue0_1(freeToIssue0_wire),
     .o_FreeToIssue1_1(freeToIssue1_wire),
     .io_empty_1(empty_wire),
     .io_IsFirst_1(isFirst_wire),
-    .i_InstructionToLSUIssue_113(instruction_wire),
+    .i_InstructionToMulIssue_113(instruction_wire),
     .i_DriveFromWriteBack_1(driveFromWriteBack_wire),
     .o_FreeToWriteBack_1(freeToWriteBack_wire),
     .i_DriveFromIssue_1(driveFromIssue_wire),
     .o_FreeToIssue_1(freeToIssue_wire),
-    .i_FreeBypassFifoToLSUIssue(fifoToLSUIssue_wire),
-    .o_DriveLSUIssueToBypassFifo(driveLSUIssueToBypassFifo_wire),
-    .i_DriveBypassFifoToLSUIssue(driveBypassFifoToLSUIssue_wire),
-    .o_FreeLSUIssueToBypassBuffer(freeLSUIssueToBypassBuffer_wire)
+    .i_FreeBypassFifoToMulIssue(fifoToMulIssue_wire),
+    .o_DriveMulIssueToBypassFifo(driveMulIssueToBypassFifo_wire),
+    .i_DriveBypassFifoToMulIssue(driveBypassFifoToMulIssue_wire),
+    .o_FreeMulIssueToBypassBuffer(freeMulIssueToBypassBuffer_wire)
+);
+//Div
+wire w_PmtDivIssueFifo =r_DivEmpty_1;
+
+wire w_Drive_Cond10ToPmtDiv;
+wire w_Free_PmtDivToCond10;
+output wire o_Drive_DivPmtToDivIssue;
+input  wire i_Free_DivIssueToDivPmt;
+wire w_DivPmtFire;
+
+cPmtFifo1 cPmtFifo_ToDivIssue(
+        .i_drive(w_Drive_Cond10ToPmtDiv),
+        .i_freeNext(i_Free_DivIssueToDivPmt), 
+        .rst(rstn),
+        .pmt(w_PmtDivIssueFifo),
+        .o_free(w_Free_PmtDivToCond10),
+        .o_driveNext(o_Drive_DivPmtToDivIssu),
+        .o_fire_1(w_DivPmtFire)
+);
+
+
+reg   [4:0]  r_DivGray_5;
+reg   [4:0]  r_DivBinnary_5;
+
+wire  [4:0]  w_DivBinnary_5 = DivAddress;
+wire  [4:0]  w_DivGray_5;
+
+assign w_DivGray_5 = (w_DivBinnary_5>>1) ^ w_DivBinnary_5; 
+
+always @(posedge w_DivPmtFire or negedge rstn) begin
+  if(!rstn) begin
+  r_DivGray_5 <= 5'b0;
+  r_DivBinnary_5 <= 5'b0;
+  end
+  else begin
+  r_DivGray_5 <= w_DivBinnary_5;
+  r_DivBinnary_5 <= w_DivGray_5;
+  end
+end
+
+output wire o_DivBinnary_5 = r_DivBinnary_5;
+output wire o_DivGray_5 = r_DivGray_5;
+
+
+wire w_Drive_MutexToDivEmpty;
+wire w_Free_DivEmptyToMutex;
+input wire i_Drive_DivIssueToDivEmpty;
+output wire o_Drive_DivEmptyToDivIssue;
+wire w_Drive_Cond10ToMutexDiv;
+wire w_Free_MutexDivToCond10;
+
+
+
+cMutexMerge2_32b MutexMergeDiv(
+        .i_drive0(i_Drive_DivIssueToDivEmpty),
+        .i_drive1(w_Drive_Cond10ToMutexDiv),
+        .i_data0_32(),
+        .i_data1_32(),
+        .i_freeNext(w_Free_DivEmptyToMutex),
+        .rst(rstn),
+        .o_free0(o_Drive_DivEmptyToDivIssue),
+        .o_free1(w_Free_MutexDivToCond10),
+        .o_driveNext(w_Drive_MutexToDivEmpty),
+        .o_data_32(),
+    );
+
+cLastFifo2  DivEmpty (
+  .i_drive(w_Drive_MutexToDivEmpty),   
+  .rst(rstn),                
+  .o_free(w_Free_DivEmptyToMutex),           
+  .o_driveNext(),  
+  .o_fire_1(w_fireDivEmpty)       
+);
+wire w_fireDivEmpty;
+
+always @(posedge w_fireDivEmpty or negedge rstn) begin
+  if(!rstn) begin
+    r_DivEmpty_1 <= 0;
+  end
+  else begin
+  if(i_DivReadEmpty_1==1)begin
+    r_DivEmpty_1 <= 1;
+  end
+  else begin
+    r_DivEmpty_1 <= 0;
+  end
+  end
+end
+
+DivIssue myDivInstance (
+    .rstn(rstn_wire),
+    .i_DivCount_5(count_wire),
+    .o_FreeToIssue0_1(freeToIssue0_wire),
+    .o_FreeToIssue1_1(freeToIssue1_wire),
+    .io_empty_1(empty_wire),
+    .io_IsFirst_1(isFirst_wire),
+    .i_InstructionToDivIssue_113(instruction_wire),
+    .i_DriveFromWriteBack_1(driveFromWriteBack_wire),
+    .o_FreeToWriteBack_1(freeToWriteBack_wire),
+    .i_DriveFromIssue_1(driveFromIssue_wire),
+    .o_FreeToIssue_1(freeToIssue_wire),
+    .i_FreeBypassFifoToDivIssue(fifoToDivIssue_wire),
+    .o_DriveDivIssueToBypassFifo(driveDivIssueToBypassFifo_wire),
+    .i_DriveBypassFifoToDivIssue(driveBypassFifoToDivIssue_wire),
+    .o_FreeDivIssueToBypassBuffer(freeDivIssueToBypassBuffer_wire)
+);
+
+//Lsu
+wire w_PmtLsuIssueFifo =r_LsuEmpty_1;
+
+wire w_Drive_Cond10ToPmtLsu;
+wire w_Free_PmtLsuToCond10;
+output wire o_Drive_LsuPmtToLsuIssue;
+input  wire i_Free_LsuIssueToLsuPmt;
+wire w_LsuPmtFire;
+
+cPmtFifo1 cPmtFifo_ToLsuIssue(
+        .i_drive(w_Drive_Cond10ToPmtLsu),
+        .i_freeNext(i_Free_LsuIssueToLsuPmt), 
+        .rst(rstn),
+        .pmt(w_PmtLsuIssueFifo),
+        .o_free(w_Free_PmtLsuToCond10),
+        .o_driveNext(o_Drive_LsuPmtToLsuIssu),
+        .o_fire_1(w_LsuPmtFire)
+);
+
+
+reg   [4:0]  r_LsuGray_5;
+reg   [4:0]  r_LsuBinnary_5;
+
+wire  [4:0]  w_LsuBinnary_5 = LsuAddress;
+wire  [4:0]  w_LsuGray_5;
+
+assign w_LsuGray_5 = (w_LsuBinnary_5>>1) ^ w_LsuBinnary_5; 
+
+always @(posedge w_LsuPmtFire or negedge rstn) begin
+  if(!rstn) begin
+  r_LsuGray_5 <= 5'b0;
+  r_LsuBinnary_5 <= 5'b0;
+  end
+  else begin
+  r_LsuGray_5 <= w_LsuBinnary_5;
+  r_LsuBinnary_5 <= w_LsuGray_5;
+  end
+end
+
+output wire o_LsuBinnary_5 = r_LsuBinnary_5;
+output wire o_LsuGray_5 = r_LsuGray_5;
+
+
+wire w_Drive_MutexToLsuEmpty;
+wire w_Free_LsuEmptyToMutex;
+input wire i_Drive_LsuIssueToLsuEmpty;
+output wire o_Drive_LsuEmptyToLsuIssue;
+wire w_Drive_Cond10ToMutexLsu;
+wire w_Free_MutexLsuToCond10;
+
+
+
+cMutexMerge2_32b MutexMergeLsu(
+        .i_drive0(i_Drive_LsuIssueToLsuEmpty),
+        .i_drive1(w_Drive_Cond10ToMutexLsu),
+        .i_data0_32(),
+        .i_data1_32(),
+        .i_freeNext(w_Free_LsuEmptyToMutex),
+        .rst(rstn),
+        .o_free0(o_Drive_LsuEmptyToLsuIssue),
+        .o_free1(w_Free_MutexLsuToCond10),
+        .o_driveNext(w_Drive_MutexToLsuEmpty),
+        .o_data_32(),
+    );
+
+cLastFifo2  LsuEmpty (
+  .i_drive(w_Drive_MutexToLsuEmpty),   
+  .rst(rstn),                
+  .o_free(w_Free_LsuEmptyToMutex),           
+  .o_driveNext(),  
+  .o_fire_1(w_fireLsuEmpty)       
+);
+wire w_fireLsuEmpty;
+
+always @(posedge w_fireLsuEmpty or negedge rstn) begin
+  if(!rstn) begin
+    r_LsuEmpty_1 <= 0;
+  end
+  else begin
+  if(i_LsuReadEmpty_1==1)begin
+    r_LsuEmpty_1 <= 1;
+  end
+  else begin
+    r_LsuEmpty_1 <= 0;
+  end
+  end
+end
+
+LsuIssue myLsuInstance (
+    .rstn(rstn_wire),
+    .i_LsuCount_5(count_wire),
+    .o_FreeToIssue0_1(freeToIssue0_wire),
+    .o_FreeToIssue1_1(freeToIssue1_wire),
+    .io_empty_1(empty_wire),
+    .io_IsFirst_1(isFirst_wire),
+    .i_InstructionToLsuIssue_113(instruction_wire),
+    .i_DriveFromWriteBack_1(driveFromWriteBack_wire),
+    .o_FreeToWriteBack_1(freeToWriteBack_wire),
+    .i_DriveFromIssue_1(driveFromIssue_wire),
+    .o_FreeToIssue_1(freeToIssue_wire),
+    .i_FreeBypassFifoToLsuIssue(fifoToLsuIssue_wire),
+    .o_DriveLsuIssueToBypassFifo(driveLsuIssueToBypassFifo_wire),
+    .i_DriveBypassFifoToLsuIssue(driveBypassFifoToLsuIssue_wire),
+    .o_FreeLsuIssueToBypassBuffer(freeLsuIssueToBypassBuffer_wire)
 );
 
 
