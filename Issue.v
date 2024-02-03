@@ -149,11 +149,6 @@ module Issue(
 );
 
 
-/*reg   [3:0] r_CsrAddresss_4;
-reg   [3:0] r_ALUCount_4;
-reg   [3:0] r_LsuAddress_4;*/
-
-
 reg   [3:0] r_count_4;
 wire  w_fire0_1;
 wire  w_fire1_1;
@@ -871,7 +866,7 @@ wire w_fireCsrEmpty;
 
 always @(posedge w_fireCsrEmpty or negedge rstn) begin
   if(!rstn) begin
-    r_CsrEmpty_1 <= 0;
+    r_CsrEmpty_1 <= 1;
   end
   else begin
   if(i_CsrReadEmpty_1==1)begin
@@ -902,7 +897,7 @@ CsrIssue myCsrInstance (
 );
 
 //Mul
-wire w_PmtMulIssueFifo =r_MulEmpty_1;
+wire w_PmtMulIssueFifo = r_MulEmpty_1;
 
 wire w_Drive_Cond10ToPmtMul;
 wire w_Free_PmtMulToCond10;
@@ -977,7 +972,7 @@ wire w_fireMulEmpty;
 
 always @(posedge w_fireMulEmpty or negedge rstn) begin
   if(!rstn) begin
-    r_MulEmpty_1 <= 0;
+    r_MulEmpty_1 <= 1;
   end
   else begin
   if(i_MulReadEmpty_1==1)begin
@@ -1082,7 +1077,7 @@ wire w_fireDivEmpty;
 
 always @(posedge w_fireDivEmpty or negedge rstn) begin
   if(!rstn) begin
-    r_DivEmpty_1 <= 0;
+    r_DivEmpty_1 <= 1;
   end
   else begin
   if(i_DivReadEmpty_1==1)begin
@@ -1188,7 +1183,7 @@ wire w_fireLsuEmpty;
 
 always @(posedge w_fireLsuEmpty or negedge rstn) begin
   if(!rstn) begin
-    r_LsuEmpty_1 <= 0;
+    r_LsuEmpty_1 <= 1;
   end
   else begin
   if(i_LsuReadEmpty_1==1)begin

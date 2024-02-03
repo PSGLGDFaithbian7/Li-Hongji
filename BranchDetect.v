@@ -481,6 +481,7 @@ always @(*) begin
       w_BranchInstructionPC_32 = r_BranchInstuction_73[106:75];
 end
 
+
 cCopyFork2_32b CopyFork3(
               i_drive(w_Drive_cFifo1ToCopyFork3),
               i_freeNext0(w_Free_GrfPmtToCopyFork3),
@@ -555,7 +556,7 @@ always @(posedge w_fireGrfPmt or negedge rstn ) begin
         r_BranchRs2_5 <= 5'b0;
         end
         else begin
-        r_BranchRs1_5 <= r_BranchInstuction_73[41:36];
+        r_BranchRs1_5 <= r_BranchInstuction_73[29:24];
         r_BranchRs2_5 <= r_BranchInstuction_73[35:30];
         end
 end     
@@ -575,8 +576,8 @@ wire         w_FreeFromMutexMerge1R_1;
 wire         w_FreeToMutexMerge1A_1;
 wire         w_FreeToMutexMerge1B_1;
 input wire   i_DriveTocPmtFifoFromBypass_1;
-wire        w_DriveToMutexMerge2_1;
-wire        w_FreeFromMutexMerge2_1;
+wire         w_DriveToMutexMerge2_1;
+wire         w_FreeFromMutexMerge2_1;
 
 
 wire w_dep1_4;

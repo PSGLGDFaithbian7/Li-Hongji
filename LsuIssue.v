@@ -4,8 +4,8 @@ module LsuIssue (
     input wire i_LSUCount_5;
     output wire o_FreeToIssue0_1,
     output wire o_FreeToIssue1_1            
-    inout wire io_empty_1;
-    inout wire io_IsFirst_1;
+    input wire i_CsrEmpty;
+
     input wire [1807:0] i_InstructionToLSUIssue_113; 
 
     input  wire  i_DriveFromWriteBack_1;
@@ -34,8 +34,10 @@ wire  w_FreeToPmtFifo1_1;
 wire w_permit0_1;
 wire w_permit1_1;
 
-assign w_permit0_1 = ! (io_empty_1 | io_IsFirst_1);
-assign w_permit1_1 = io_empty_1 | io_IsFirst_1;
+wire w_LsuEmpty;
+
+assign w_permit0_1 = !w_LsuEmpty;
+assign w_permit1_1 = w_LsuEmpty;
 
 
 
@@ -49,14 +51,15 @@ assign w_permit1_1 = io_empty_1 | io_IsFirst_1;
       .o_fire_1()
 );
 
-cPmtFifo1 cPmtFifo1(
+
+wire w_fireRestart;
+cFifo1 cPmtFifo1(
       .i_drive(i_DriveFromIssue_1 ),
       .i_freeNext(w_FreeToPmtFifo1_1), 
       .rst(rstn),
-      .pmt(w_permit1_1),
       .o_free(o_FreeToIssue_1),
       .o_driveNext(w_DriveToMutexMerge0R_1),
-      .o_fire_1()
+      .o_fire_1(w_fireRestart)
 );
 
 
@@ -76,7 +79,7 @@ wire [3:0] w_LSUAddress_4 ;
 
 
 cMutexMerge2_32b MutexMerge0(
-        .i_drive0( w_DriveToMutexMerge0L_1),
+        .i_drive0(w_DriveToMutexMerge0L_1),
         .i_drive1(w_DriveToMutexMerge0R_1),
         .i_data0_32(),
         .i_data1_32(),
@@ -97,78 +100,10 @@ input  wire i_FreeToLSUFifo_1;
 wire w_Drive_cFifo0ToCopyFork0_1;
 wire w_Free_cCopyFork0TocFifo0_1;
 
+reg  [115:0]  r_InstructionOut_115;
+wire [115:0]  w_InsrtuctionOut_115;1
 
-
-
-  reg [112:0] r_InstructionOut_113;
-  wire [112:0] w_InsrtuctionOut_113;
-  
-  always @(posedge w_fire00_1 or negedge rstn) begin
-    if (!rst) begin
-      r_InstructionOut_113 <= 113'b0;
-      w_InsrtuctionOut_113 = r_InstructionOut_113;
-     
-    end
-    else begin
-      r_InstructionOut_113 <= i_InstructionToLSUIssue_113[w_LSUAddress_4];
-      w_InsrtuctionOut_113 = r_InstructionOut_113;
-      end
-    end
-
-
-  assign  w_LSUAddress_4        =  r_binnay_5[3:0]; 
-  assign  w_binnarynext_5    =  r_binnay_5 + ~io_empty_1; 
-  assign  w_graynext_5  =  (w_binnarynext_5>>1) ^ w_binnarynext_5; 
-  assign   w_empty_1 =  (w_graynext_5 == i_LSUCount_5);
-
-
-
-always@(posedge w_fire01_1 or negedge rstn)begin
-if (!rstn) begin
-
-          r_binnay_5 <=  5'b0;
-          r_pointer_5 <= 5'b0;
-
-      end  
-      else begin        
-          r_binnay_5 <=   r_binnay_5 + ~io_empty_1;
-          r_pointer_5 =   (w_binnarynext_5>>1) ^ w_binnarynext_5;
-      end
-
-
-  always @(posedge w_fire01_1 or negedge rstn) 
-      if (!rstn)
-          rempty <= 1'b1; 
-      else     
-          rempty <= w_empty_1;
-end
-
-
-wire w_Rs1Valid_1 = w_InsrtuctionOut_113[68];
-wire w_Rs2Valid_1 = w_InsrtuctionOut_113[68];
-wire [3:0] w_dep1_4 = w_InsrtuctionOut_113[107:103];
-wire [3:0] w_dep2_4 = w_InsrtuctionOut_113[112:108];
-wire [31:0] w_immediate_32 = w_InsrtuctionOut_113[53:22];
-wire [4:0] w_Rs1_5 = w_InsrtuctionOut_113[68:64];
-wire [4:0] w_Rs2_5 =  w_InsrtuctionOut_113[63:59];
-
-input wire i_LsuOperandFromGrf_32;
-wire [4:0] w_LsuAddress_5 = w_Rs1_5;
-input wire i_FreeFromGRFToLsuIssue_1;
-output wire o_Drive_FromLsuLssueToGRf_1;
-
-
-
-input wire i_LsuOperandFromBypassBuffer_32;
-wire  [3:0] w_LsuDep_4 = w_dep1_4;
-input wire i_FreeFromBypassBufferToLsuIssue_1;
-output wire o_Drive_FromLsuLssueToBypassBuffer_1;
-wire [31:0] w_LsuOutputData_32 ={w_LsuAddress_5,w_LsuDep_4} ;
-
-
-
-//已连接，数据修改未完成
- cFifo2 cFifo0(
+cFifo2 cFifo0(
      .i_drive(w_DriveMutexMerge0TocFifo0_1),
      .i_freeNext(w_Free_CopyFork0TocFifo0_1),
      .rst(rstn),
@@ -177,36 +112,49 @@ wire [31:0] w_LsuOutputData_32 ={w_LsuAddress_5,w_LsuDep_4} ;
      .o_fire_1(w_fire0_2),
 );
 
+  
+always @(posedge w_fire00_1 or negedge rstn) begin
+    if (!rst) begin
+    r_InstructionOut_115 <= 115'b0;
+    end
+    else begin
+    r_InstructionOut_115 <= i_InstructionToLSUIssue_113[w_LSUAddress_4];
+    end
+    end
+assign  w_InsrtuctionOut_115 = r_InstructionOut_115;
+
+always @(*) begin
+w_LSUAddress_4   =  r_binnay_5[3:0]; 
+w_binnarynext_5  =  r_binnay_5 + ~w_LsuEmpty; 
+w_graynext_5  =  (w_binnarynext_5>>1) ^ w_binnarynext_5; 
+w_LsuEmpty =  (w_graynext_5 == i_LsuGray);
+end
 
 
 
+always@(posedge w_fire01_1 or negedge rstn)begin
+     if (!rstn) begin
+     r_binnay_5 <=  5'b0;
+     r_pointer_5 <= 5'b0;
+    end  
+    else begin        
+    r_binnay_5 <=   w_binnarynext_5;
+    r_pointer_5 <=   w_graynext_5;
+    end
 
 
-cCopyFork2_32b cCopyFork0(
-    i_drive(w_Drive_cFifo0ToCopyFork0_1),
-    i_freeNext0(w_Free_CopyFork01ToCopyFork0_1),
-    i_freeNext1(w_Free_cCopyFork0TocFifo0_1),
-    rst(rstn),
-    i_data_32(w_LsuOutputData0_32),
-    o_free(w_Free_CopyFork0TocFifo0_1),
-    o_driveNext0(o_Drive_FromCopyFork0ToCopyFork01_1),
-    o_driveNext1(o_Drive_FromCopyFork0ToCopyFork02_1),
-    o_data0(w_LsuOutputData1_32[8:4]),
-    o_data1(w_LsuOutputData2_32[3:0]),
-);
+  always @(posedge w_fire01_1 or negedge rstn) 
+      if (!rstn) begin
+      r_LsuEmpty <= 1'b1; 
+        end
+      else  begin
+      r_LsuEmpty <= w_LsuEmpty;
+      end
+end
 
-cCopyFork2_32b cCopyFork01(
-    i_drive(o_Drive_FromCopyFork0ToCopyFork01_1),
-    i_freeNext0(i_FreeFromBypassBufferToCopyFork01_1),
-    i_freeNext1(i_FreeFromGRFToCopyFork01_1),
-    rst(rstn),
-    i_data_32(w_LsuOutputData1_32),
-    o_free(w_Free_CopyFork01ToCopyFork0_1),
-    o_driveNext0(o_Drive_FromCopyFork01ToBypassBuffer_1),
-    o_driveNext1(o_Drive_FromCopyFork01ToGRF_1),
-    o_data0(w_LsuOutputData11_32[8:4]),
-    o_data1(w_LsuOutputData12_32[3:0]),
-);
+output wire o_LsuEmpty;
+
+assign o_LsuEmpty = r_LsuEmpty;
 
 cCopyFork2_32b cCopyFork02(
     i_drive(o_Drive_FromCopyFork0ToCopyFork02_1),
@@ -222,16 +170,112 @@ cCopyFork2_32b cCopyFork02(
 );
 
 
+cCopyFork2_32b cCopyFork0(
+    i_drive(w_Drive_cFifo0ToCopyFork0_1),
+    i_freeNext0(w_Free_CopyFork01ToCopyFork0_1),
+    i_freeNext1(w_Free_cCopyFork0TocFifo0_1),
+    rst(rstn),
+    i_data_32(w_LsuOutputData0_32),
+    o_free(w_Free_CopyFork0TocFifo0_1),
+    o_driveNext0(o_Drive_FromCopyFork0ToCopyFork01_1),
+    o_driveNext1(o_Drive_FromCopyFork0ToCopyFork02_1),
+    o_data0(w_LsuOutputData1_32[8:4]),
+    o_data1(w_LsuOutputData2_32[3:0]),
+);
+
+
 //
+always @(*) begin
+      w_dep1_4 = w_InsrtuctionOut_115[110:107];
+      w_dep2_4 = w_InsrtuctionOut_115[114:111];
+      w_LsuInstruction_115 = w_InsrtuctionOut_115;
+      w_LsuInstructionImm_32 = w_InsrtuctionOut_115[74:13];
+end
 
-BypassBuffer BypassBuffer0{
-     .(),
-     .(),
-     .(),
-     .(),
-     .(),
-};
+wire w_LsuInstructionImm_32;
 
+
+output wire o_Drive_BypassPmtToBypass;
+output wire o_Drive_GrfPmtToGrf;
+input  wire i_Free_BypassToBypassPmt;
+input  wire i_Free_GrfToGrfPmt;
+
+wire w_fireBypassPmt;
+wire w_fireGrfPmt;
+
+output wire [4:0] o_LsuRs1_5;
+output wire [4:0] o_LsuRs2_5;
+
+reg [4:0] r_LsuRs1_5;
+reg [4:0] r_LsuRs2_5;
+
+reg [3:0] r_LsuDepL_4;
+reg [3:0] r_LsuDepR_4;
+
+output wire [3:0] o_LsuDepL_4;
+output wire [3:0] o_LsuDepR_4;
+
+cPmtFifo1 cPmtFifo_ToBypass(
+        .i_drive(w_Drive_CopyFork3ToGrfPmt),
+        .i_freeNext(i_Free_BypassToBypassPmt), 
+        .rst(rstn),
+        .pmt(w_IsDriveWithDep_1),
+        .o_free(w_Free_BypassPmtToCopyFork3),
+        .o_driveNext(o_Drive_BypassPmtToBypass),
+        .o_fire_1(),
+);
+
+always @(posedge w_fireBypassPmt or negedge rstn ) begin
+        if(!rstn) begin
+        r_LsuDepL_4 <= 4'b0;
+        r_LsuDepR_4 <= 4'b0;
+        end
+        else begin
+        r_LsuDepL_4 <= w_dep1_4;
+        r_LsuDepR_4 <= w_dep2_4;
+        end
+end     
+
+assign o_LsuDepL_4 = r_LsuDepL_4;
+assign o_LsuDepR_4 = r_LsuDepR_4;
+
+
+ cPmtFifo1 cPmtFifo_ToGRF(
+        .i_drive(w_Drive_CopyFork3ToBypassPmt),
+        .i_freeNext(i_Free_GrfToGrfPmt), 
+        .rst(rstn),
+        .pmt(w_IsDriveWithGRF_1),
+        .o_free(w_Free_GrfPmtToCopyFork3),
+        .o_driveNext(o_Drive_GrfPmtToGrf),
+        .o_fire_1(),
+);
+
+always @(posedge w_fireGrfPmt or negedge rstn ) begin
+        if(!rstn) begin
+        r_LsuRs1_5 <= 5'b0;
+        r_LsuRs2_5 <= 5'b0;
+        end
+        else begin
+        r_LsuRs1_5 <= w_InsrtuctionOut_115[29:24];
+        r_LsuRs2_5 <= w_InsrtuctionOut_115[35:30];
+        end
+end     
+
+assign o_LsuRs1_5 = r_LsuRs1_5;
+assign o_LsuRs2_5 = r_LsuRs2_5;
+//
+input wire [31:0] i_LsuOperandFromGrf_32;
+input wire i_FreeFromGRFToLsuIssue_1;
+output wire o_Drive_FromLsuLssueToGRf_1;
+
+
+
+input wire [31:0] i_LsuOperandFromBypassBuffer_32;
+wire  [3:0] w_LsuDep_4 = w_dep1_4;
+input wire i_FreeFromBypassBufferToLsuIssue_1;
+output wire o_Drive_FromLsuLssueToBypassBuffer_1;
+
+//已连接，数据修改未完成
 
 wire   w_IsDriveWithDepL_1 = (w_dep1_4==4'b1111) ? 1'b0: 1'b1;
 wire   w_IsDriveWithGRFL_1=~(w_IsDriveWithDepL_1);
@@ -398,10 +442,10 @@ always @(posedge w_IssueFifoFire_1 or negedge rstn) begin
     else begin
        r_final_oprandL_32 <= w_final_oprandL_32 ;
        r_final_oprandR_32 <= w_final_oprandR_32 ;
-       o_InstructionToExe_177={w_InsrtuctionOut_113,r_final_oprandL_32,r_final_oprandR_32};
-    end
-    end
 
+    end
+    end
+assign  o_InstructionToExe_177={w_InsrtuctionOut_113,r_final_oprandL_32,r_final_oprandR_32};
 
 endmodule
 
