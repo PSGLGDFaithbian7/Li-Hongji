@@ -421,10 +421,11 @@ input wire [31:0] i_OeprandFromGrfR_32;
 wire [31:0]  w_final_oprandL_32;
 wire [31:0]  w_final_oprandR_32;
    
-
+wire w_Rs1Valid_1 = r_DivRs1_5[0];
+wire w_Rs2Valid_1 = r_DivRs2_5[0];
 
 assign w_final_oprandL_32 = (w_Rs1Valid_1==1'b1) ? w_immediate_32  : ((w_dep1_4==4'b1111)?  i_bypass_operandL_32 : i_OeprandFromGrfL_32);
-assign w_final_oprandR_32 = (w_Rs1Valid_1==1'b1) ? w_immediate_32  : ((w_dep2_4==4'b1111)?  i_bypass_operandR_32 : i_OeprandFromGrfR_32);
+assign w_final_oprandR_32 = (w_Rs2Valid_1==1'b1) ? w_immediate_32  : ((w_dep2_4==4'b1111)?  i_bypass_operandR_32 : i_OeprandFromGrfR_32);
     
 reg  [31:0]  r_final_oprandL_32;
 reg  [31:0]  r_final_oprandR_32;
