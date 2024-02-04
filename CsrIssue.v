@@ -103,7 +103,7 @@ wire w_Drive_cFifo0ToCopyFork0_1;
 wire w_Free_cCopyFork0TocFifo0_1;
 
 reg  [115:0]  r_InstructionOut_115;
-wire [115:0]  w_InsrtuctionOut_115;1
+wire [115:0]  w_InsrtuctionOut_115;
 
 cFifo2 cFifo0(
      .i_drive(w_DriveMutexMerge0TocFifo0_1),
@@ -174,19 +174,19 @@ cCopyFork2_32b cCopyFork0(
     o_data1(),
 );
 //启动旁路与GRF
-wire w_FreeFromGRFPmtToCsrIssue_1;
-wire w_Drive_FromCsrLssueToGRFPmt_1;
+wire w_FreeFromGRFandCsrPmtToCsrIssue_1;
+wire w_Drive_FromCsrLssueToGRFandCsrPmt_1;
 wire w_FreeFromBypassBufferPmtToCsrIssue_1;
 wire w_Drive_FromCsrLssueToBypassBufferPmt_1;
 
 cCopyFork2_32b cCopyFork02(
     i_drive(o_Drive_FromCopyFork0ToCopyFork02_1),
-    i_freeNext0(w_FreeFromGRFPmtToCsrIssue_1),
+    i_freeNext0(w_FreeFromGRFandCsrPmtToCsrIssue_1),
     i_freeNext1(w_FreeFromBypassBufferPmtToCsrIssue_1),
     rst(rstn),
     i_data_32(w_CsrOutputData2_32),
     o_free(w_Free_CopyFork02ToCopyFork0_1),
-    o_driveNext0(w_Drive_FromCsrLssueToGRFPmt_1),
+    o_driveNext0(w_Drive_FromCsrLssueToGRFandCsrPmt_1),
     o_driveNext1(w_Drive_FromCsrLssueToBypassBufferPmt_1),
     o_data0(),
     o_data1(),
@@ -226,11 +226,11 @@ output wire [3:0] o_CsrDepL_4;
 
 
 cPmtFifo1 cPmtFifo_ToBypass(
-        .i_drive(w_Drive_FromCsrLssueToGRFPmt_1),
+        .i_drive(w_Drive_FromCsrLssueToBypassBufferPmt_1),
         .i_freeNext(i_Free_BypassToBypassPmt), 
         .rst(rstn),
         .pmt(w_IsDriveWithDep_1),
-        .o_free(w_FreeFromGRFPmtToCsrIssue_1),
+        .o_free(w_FreeFromBypassBufferPmtToCsrIssue_1),
         .o_driveNext(o_Drive_BypassPmtToBypass),
         .o_fire_1(),
 );
@@ -238,24 +238,20 @@ cPmtFifo1 cPmtFifo_ToBypass(
 always @(posedge w_fireBypassPmt or negedge rstn ) begin
         if(!rstn) begin
         r_CsrDepL_4 <= 4'b0;
-        r_CsrDepR_4 <= 4'b0;
         end
         else begin
         r_CsrDepL_4 <= w_dep1_4;
-        r_CsrDepR_4 <= w_dep2_4;
         end
 end     
 
 assign o_CsrDepL_4 = r_CsrDepL_4;
-assign o_CsrDepR_4 = r_CsrDepR_4;
-
 
  cPmtFifo1 cPmtFifo_ToGRFandCsr(
-        .i_drive(w_Drive_FromCsrLssueToBypassBufferPmt_1),
+        .i_drive(w_Drive_FromCsrLssueToGRFandCsrPmt_1),
         .i_freeNext(i_Free_GrfToGrfPmt), 
         .rst(rstn),
         .pmt(w_IsDriveWithGRF_1),
-        .o_free(w_FreeFromBypassBufferPmtToCsrIssue_1),
+        .o_free(w_FreeFromGRFandCsrPmtToCsrIssue_1),
         .o_driveNext(o_Drive_GrfPmtToGrf),
         .o_fire_1(),
 );
@@ -273,16 +269,27 @@ end
 
 assign o_CsrRs1_5 = r_CsrRs1_5;
 assign o_CsrRs2_12 = r_CsrRs2_12;
-//改
-cCopyFork2_32b cCopyFork02(
-    i_drive(o_Drive_FromCopyFork0ToCopyFork02_1),
-    i_freeNext0(w_FreeFromGRFPmtToCsrIssue_1),
-    i_freeNext1(w_FreeFromBypassBufferPmtToCsrIssue_1),
+
+
+wire w_Drive_CsrGrfPmtToCopyfork03;
+wire w_Free_Copyfork03ToCsrGrfPmt;
+
+input wire i_Free_CsrToCsrIssue;
+input wire i_Free_GrfToCsrIssue;
+output wire o_Drive_CsrIssueToCsr;
+output wire o_Drive_CsrIssueToGrf;
+
+
+
+cCopyFork2_32b cCopyFork03(
+    i_drive(w_Drive_CsrGrfPmtToCopyfork03),
+    i_freeNext0(i_Free_CsrToCsrIssue),
+    i_freeNext1(i_Free_GrfToCsrIssue),
     rst(rstn),
-    i_data_32(w_CsrOutputData2_32),
-    o_free(w_Free_CopyFork02ToCopyFork0_1),
-    o_driveNext0(w_Drive_FromCsrLssueToGRFPmt_1),
-    o_driveNext1(w_Drive_FromCsrLssueToBypassBufferPmt_1),
+    i_data_32(),
+    o_free(w_Free_Copyfork03ToCsrGrfPmt),
+    o_driveNext0(o_Drive_CsrIssueToCsr),
+    o_driveNext1(o_Drive_CsrIssueToGrf),
     o_data0(),
     o_data1(),
 );
@@ -290,6 +297,8 @@ cCopyFork2_32b cCopyFork02(
 //
 input wire [31:0] i_CsrOperandFromGrf_32;
 input wire [31:0] i_CsrOperandFromBypassBuffer_32;
+input wire [31:0] i_CsrOperandFromCsr_32;
+
 
 wire  [3:0] w_CsrDep_4 = w_dep1_4;
 wire   w_IsDriveWithDepL_1 = (w_dep1_4==4'b1111) ? 1'b0: 1'b1;
@@ -314,6 +323,8 @@ wire w_DriveWaitMergeToIssueFifo_1;
 wire w_FreeIssueFifoToWaitMerge_1;
 wire w_IssueFifoFire_1;
 
+wire w_Drive_CsrOpeToWaitMerge;
+wire w_Free_WaitMergeToCsrope;
 
 cPmtFifo1 cPmtFifo_FromBypassL(
         .i_drive(i_Drive_GRF_To_CsrIssueL_1),
@@ -353,29 +364,26 @@ cMutexMerge2_32b  cMutexMerge1L(
 );
 
 
-//改
-
- cPmtFifo1 cPmtFifo_FromCsrR(
+ cFifo1 cPmtFifo_FromCsrR(
         .i_drive(i_Drive_Csr_To_CsrIssueR_1),
-        .i_freeNext(w_FreeMutexMerge1RToCsrPmt_1), 
+        .i_freeNext(w_Free_WaitMergeToCsrope), 
         .rst(rstn),
-        .pmt(w_IsDriveWithCsrR_1),
         .o_free(o_Free_CsrIssueR_To_Csr_1),
-        .o_driveNext(w_DriveCsrPmtToMutexMerge1R_1),
+        .o_driveNext(w_Drive_CsrOpeToWaitMerge),
         .o_fire_1()
 );
 
 
 
 cWaitMerge2_32b  cWaitMerge0(
-         .i_drive0(),
-         .i_drive1(),
+         .i_drive0(w_DriveMutexMergeLToWaitMerge_1),
+         .i_drive1(w_Drive_CsrOpeToWaitMerge),
          .i_data0_32(),
          .i_data1_32(),
          .i_freeNext(w_FreeIssueFifoToWaitMerge_1),
          .rst(rstn),
          .o_free0(w_FreeWaitMergeToMutexMergeL_1),
-         .o_free1(w_FreeWaitMergeToMutexMergeR_1),
+         .o_free1(w_Free_WaitMergeToCsrope),
          .o_driveNext(w_DriveWaitMergeToIssueFifo_1),
          .o_data_64()
 );
