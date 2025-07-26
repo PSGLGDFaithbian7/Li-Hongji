@@ -382,7 +382,7 @@ always@(posedge w_fire02 or negedge rstn) begin
         r_counter <= 1'b0;
     end
     else begin
-        r_counter = r_counter + 1'b1;
+        r_counter <= r_counter + 1'b1;
     end
 end
 
@@ -421,14 +421,14 @@ end
 end
 for(j=1;j<16;j=j+1)begin
 for(k=0;k<16;k=k+1)begin
-        if(srcl[j]==dest[k] && srclValid[j]!=0 && destValid[k]!=0)begin
+        if( srcl[j]==dest[k] && srclValid[j]!=0 && destValid[k]!=0)begin
             r_rawDepl[k][j]   <= 1'b1;
         end
         else begin
             r_rawDepl[k][j]   <= 1'b0;
         end
-        if(srcr[j]==dest[k] && srcrValid[j]!=0 && destValid[k]!=0)begin
-            r_rawDepr[k][j]   <=  1'b0;
+        if( srcr[j]==dest[k] && srcrValid[j]!=0 && destValid[k]!=0)begin
+            r_rawDepr[k][j]   <=  1'b1;
         end
         else begin
             r_rawDepr[k][j]   <=  1'b0

@@ -77,7 +77,7 @@ cCopyFork2_32b cCopyFork02(
 );
 
 //
-wire w_immediate_32;
+wire [31:0]w_immediate_32;
 
 always @(*) begin
       w_dep1_4 = w_InsrtuctionOut_115[110:107];
